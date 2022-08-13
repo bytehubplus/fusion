@@ -24,7 +24,7 @@ func Parse(did string) (*DID, error) {
 	const idChar = `a-zA-Z0-9.-_`
 	const methodChar = `a-z0-9`
 
-	regex := fmt.Sprintf(`^did:[a-zA-Z]+:(:+|[:%s]+)*[%%:%s]+[^:]$`, methodChar, idChar)
+	regex := fmt.Sprintf(`^did:[a-z]+:(:+|[:%s]+)*[%%:%s]+[^:]$`, methodChar, idChar)
 
 	result, err := regexp.Compile(regex)
 	if err != nil {
@@ -52,16 +52,17 @@ type DIDURL struct {
 	Fragment string
 }
 
+// Parses a string into DIDURL
 func ParseDIDURL(didURL string) (*DIDURL, error) {
 	position := strings.Index(didURL, "?/#")
-	didPart := didURL
+	did := didURL
 	pathQueryFragment := ""
 	if position != -1 {
-		didPart = didURL[:position]
-		pathQueryFragment = didPart[position:]
+		did = didURL[:position]
+		pathQueryFragment = did[position:]
 	}
 
-	redDID, err := Parse(didPart)
+	redDID, err := Parse(did)
 	if err != nil {
 		return nil, err
 	}
@@ -173,14 +174,11 @@ type processingMeta struct {
 
 // https://www.w3.org/TR/2022/REC-did-core-20220719/#verification-method-properties
 type VerificationMethod struct {
-	ID         string
-	Controller string
-	Type       string
-
-	Value []byte
-
-	PublicKeyJwk map[string]interface{}
-
+	ID                 string
+	Controller         string
+	Type               string
+	Value              []byte
+	PublicKeyJwk       map[string]interface{}
 	PublicKeyMultibase string
 }
 
@@ -257,4 +255,4 @@ type didKeyResolver struct {
 }
 
 // DocOption provides options to build DID Doc.
-type DocOption func(opts *Doc)
+type DocOption func(opts *Document)
