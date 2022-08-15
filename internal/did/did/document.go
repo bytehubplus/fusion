@@ -3,54 +3,75 @@ package did
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 )
 
 type Document struct {
-	ID                   DID                  `json:"id,omitempty"`
-	AlsoKnownas          []string             `json:"alsoKnownas,omitempty"`
-	Controller           []DID                `json:"controller,omitempty"`
-	VerificationMethod   []VerificationMethod `json:"verificationMethod,omitempty"`
-	Authentication       string               `json:"authentication,omitempty"`
-	AssertionMethod      string               `json:"assertionMethod,omitempty"`
-	KeyAgreement         string               `json:"keyAgreement,omitempty"`
-	CapabilityInvocation string               `json:"capabilityInvocation,omitempty"`
-	CapabilityDelegation string               `json:"capabilityDelegation,omitempty"`
-	Service              string               `json:"service,omitempty"`
+	Context []Context `json:"@context,omitempty"`
+	ID      DID       `json:"id,omitempty"`
+	// AlsoKnownas          VerficationRelationships `json:"alsoKnownas,omitempty"`
+	// Controller           []DID                    `json:"controller,omitempty"`
+	// VerificationMethod   VerificationMethods      `json:"verificationMethod,omitempty"`
+	// Authentication       VerficationRelationships `json:"authentication,omitempty"`
+	// AssertionMethod      VerficationRelationships `json:"assertionMethod,omitempty"`
+	// KeyAgreement         VerficationRelationships `json:"keyAgreement,omitempty"`
+	// CapabilityInvocation VerficationRelationships `json:"capabilityInvocation,omitempty"`
+	// CapabilityDelegation VerficationRelationships `json:"capabilityDelegation,omitempty"`
+	// Service              []Service                `json:"service,omitempty"`
+	// Created              *time.Time               `json:"created,omitempty"`
+	// Updated              *time.Time               `json:"update,omitempty"`
 }
 
 type VerificationMethod struct {
+	ID           DID
+	Controller   DID
+	Type         string
+	PublicKeyJwk map[string]interface{}
 }
+
+// A set of either Verification Method maps that conform to the rules in Verification Method properties) or strings that conform to the rules in 3.2 DID URL Syntax.
+type VerificationMethods []*VerificationMethod
+
+type VerficationRelationship struct {
+	*VerificationMethod
+	reference DID
+}
+
+type VerficationRelationships []VerficationRelationship
 
 type PublicKey struct {
 }
 
 type Service struct {
-	ID              DID
-	Type            string
-	ServiceEndpoint string
+	ID              URI      `json:"id"`
+	Type            []string `json:"type"`
+	ServiceEndpoint []URI    `json:"serviceEndpoint"`
 }
 
-func ParseDocument(rj []byte) (*Document, error) {
-	raw := &Document{}
-	err := json.Unmarshal(rj, &raw)
+type Context struct {
+	url.URL
+}
+
+func (ctx *Context) UnmarshalJSON(bytes []byte) error {
+	var value string
+	if err := json.Unmarshal(bytes, &value); err != nil {
+		return err
+	}
+
+	parsedUrl, err := url.Parse(value)
 	if err != nil {
-		return nil, fmt.Errorf("JSON marshalling of  document failed: %w", err)
-	} else {
-		if raw == nil {
-			return nil, fmt.Errorf("document payload is not provided")
-		}
+		return fmt.Errorf("could not parse URI: %w", err)
+	}
+	ctx.URL = *parsedUrl
+	return nil
+}
+
+func ParseDocument(bytes []byte) (*Document, error) {
+	var doc Document
+	if err := json.Unmarshal(bytes, &doc); err != nil {
+		return nil, fmt.Errorf("JSON marshalling of document failed: %w", err)
 	}
 
-	doc := &Document{
-		ID:                   raw.ID,
-		AlsoKnownas:          raw.AlsoKnownas,
-		Controller:           raw.Controller,
-		VerificationMethod:   raw.VerificationMethod,
-		Authentication:       raw.Authentication,
-		KeyAgreement:         raw.KeyAgreement,
-		CapabilityInvocation: raw.CapabilityInvocation,
-		CapabilityDelegation: raw.CapabilityDelegation,
-	}
+	return &doc, nil
 
-	return doc, nil
 }

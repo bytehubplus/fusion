@@ -1,6 +1,7 @@
 package did
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"regexp"
@@ -18,12 +19,35 @@ func (d *DID) String() string {
 	return fmt.Sprintf("%s:%s:%s", d.Scheme, d.Method, d.MethodSpecificID)
 }
 
+func (d *DID) MarshalJSON() ([]byte, error) {
+	didString := d.String()
+	return json.Marshal(didString)
+}
+
+func (d *DID) UnmarshalJSON(bytes []byte) error {
+	var didString string
+	if err := json.Unmarshal(bytes, &didString); err != nil {
+		return fmt.Errorf("unmarshal DID failed: %w", err)
+	}
+
+	did, err := Parse(didString)
+	if err != nil {
+		return fmt.Errorf("parse DID string failed: %w", err)
+	}
+
+	d = did
+	return nil
+}
+
 // Parse parses a did string to DID struct
 func Parse(did string) (*DID, error) {
-	const idChar = `a-zA-Z0-9.-_`
-	const methodChar = `a-z0-9`
+	// const idChar = `a-zA-Z0-9.-_`
+	// const methodChar = `a-z0-9`
 
-	regex := fmt.Sprintf(`^did:[a-z]+:(:+|[:%s]+)*[%%:%s]+[^:]$`, methodChar, idChar)
+	// regex := fmt.Sprintf(`^did:[a-z]+:(:+|[:%s]+)*[%%:%s]+[^:]$`, methodChar, idChar)
+
+	const idchar = `a-zA-Z0-9-_\.`
+	regex := fmt.Sprintf(`^did:[a-z0-9]+:(:+|[:%s]+)*[%%:%s]+[^:]$`, idchar, idchar)
 
 	result, err := regexp.Compile(regex)
 	if err != nil {
