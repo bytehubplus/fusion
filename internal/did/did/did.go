@@ -35,7 +35,7 @@ func (d *DID) UnmarshalJSON(bytes []byte) error {
 		return fmt.Errorf("parse DID string failed: %w", err)
 	}
 
-	d = did
+	*d = *did
 	return nil
 }
 
@@ -77,12 +77,12 @@ type DIDURL struct {
 
 // Parses a string into DIDURL
 func ParseDIDURL(didURL string) (*DIDURL, error) {
-	position := strings.Index(didURL, "?/#")
+	didStop := strings.IndexAny(didURL, "/?#")
 	did := didURL
 	pathQueryFragment := ""
-	if position != -1 {
-		did = didURL[:position]
-		pathQueryFragment = did[position:]
+	if didStop != -1 {
+		did = didURL[:didStop]
+		pathQueryFragment = did[didStop:]
 	}
 
 	redDID, err := Parse(did)
@@ -115,4 +115,24 @@ func ParseDIDURL(didURL string) (*DIDURL, error) {
 		result.Path = urlParts.Path
 	}
 	return result, nil
+}
+
+func (du *DIDURL) String() string {
+	result := du.DID.String()
+	if du.Path != "" {
+		result = fmt.Sprintf("%s/%s", result, du.Path)
+	}
+
+	if len(du.Queries) > 0 {
+		result = fmt.Sprintf("%s?", result)
+		for k, v := range du.Queries {
+			result = fmt.Sprintf("%s%s=%s", result, k, v)
+		}
+	}
+
+	if du.Fragment != "" {
+		result = fmt.Sprintf("%s#%s", result, du.Fragment)
+	}
+
+	return result
 }

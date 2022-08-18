@@ -27,6 +27,23 @@ func TestParseDocument(t *testing.T) {
 	}
 
 	t.Logf("id: %s", doc.ID.String())
-	// t.Logf("@context: %s", doc.Context[0].String())
+	for k, v := range doc.Controller {
+		t.Logf("Controller %d: %s", k, v.String())
+	}
+	for k, v := range doc.VerificationMethod {
+		t.Logf("Verfication Method %d: %s", k, v.ID)
+	}
+	for k, v := range doc.Authentication {
+		t.Logf("Authentication %d: %s", k, v.String())
+	}
+	for k, v := range doc.AssertionMethod {
+		t.Logf("Asseert Method %d: %s", k, v.String())
+	}
+	for k, v := range doc.CapabilityDelegation {
+		t.Logf("Capability Delegation %d: %s", k, v.String())
+	}
+	for k, v := range doc.Service {
+		t.Logf("Service %d: %s", k, v)
+	}
 
 }
