@@ -12,7 +12,7 @@ var (
 )
 
 type StoreConfig struct {
-	TagNames []string `json:"tag_names,omitempty"`
+	TagNames []string `json:"tagNames,omitempty"`
 }
 
 type SortOrder int
@@ -33,14 +33,14 @@ type Tag struct {
 }
 
 type PutOptions struct {
-	IsNewKey bool `json:"is_new_key,omitempty"`
+	IsNewKey bool `json:"isNewKey,omitempty"`
 }
 
 type Operation struct {
 	Key        string      `json:"key,omitempty"`
 	Value      []byte      `json:"value,omitempty"`
 	Tags       []Tag       `json:"tags,omitempty"`
-	PutOptions *PutOptions `json:"put_options,omitempty"`
+	PutOptions *PutOptions `json:"putOptions,omitempty"`
 }
 
 type QueryOptions struct {
@@ -77,19 +77,12 @@ type Provider interface {
 
 type Store interface {
 	Put(key string, value []byte, tags ...Tag) error
-
 	Get(key string) ([]byte, error)
-
 	GetTags(key string) ([]Tag, error)
-
 	GetBulk(keys ...string) ([][]byte, error)
-
 	Query(expression string, options ...QueryOption) (Iterator, error)
-
 	Delete(key string) error
-
 	Batch(operations []Operation) error
-
 	Flush() error
 	Close() error
 }

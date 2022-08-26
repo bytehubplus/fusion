@@ -9,19 +9,17 @@ import (
 )
 
 type DID struct {
-	Scheme           string
-	Method           string
-	MethodSpecificID string
+	Scheme           string `json:"scheme,omitempty"`
+	Method           string `json:"method,omitempty"`
+	MethodSpecificID string `json:"methodSpecificID,omitempty"`
 }
 
 // String returns a string representation of the DID
 func (d *DID) String() string {
+	if d.Scheme != "" && d.Method != "" && d.MethodSpecificID != "" {
+		return ""
+	}
 	return fmt.Sprintf("%s:%s:%s", d.Scheme, d.Method, d.MethodSpecificID)
-}
-
-func (d *DID) MarshalJSON() ([]byte, error) {
-	didString := d.String()
-	return json.Marshal(didString)
 }
 
 func (d *DID) UnmarshalJSON(bytes []byte) error {
@@ -41,13 +39,13 @@ func (d *DID) UnmarshalJSON(bytes []byte) error {
 
 // Parse parses a did string to DID struct
 func Parse(did string) (*DID, error) {
-	// const idChar = `a-zA-Z0-9.-_`
-	// const methodChar = `a-z0-9`
+	const idChar = `a-zA-Z0-9.-_`
+	const methodChar = `a-z0-9`
+	//
+	regex := fmt.Sprintf(`^did:[a-z][%s]+:(:+|[:%s]+)*[%%:%s]+[^:]$`, methodChar, methodChar, idChar)
 
-	// regex := fmt.Sprintf(`^did:[a-z]+:(:+|[:%s]+)*[%%:%s]+[^:]$`, methodChar, idChar)
-
-	const idchar = `a-zA-Z0-9-_\.`
-	regex := fmt.Sprintf(`^did:[a-z0-9]+:(:+|[:%s]+)*[%%:%s]+[^:]$`, idchar, idchar)
+	// const idchar = `a-zA-Z0-9-_\.`
+	// regex := fmt.Sprintf(`^did:[a-z0-9]+:(:+|[:%s]+)*[%%:%s]+[^:]$`, idchar, idchar)
 
 	result, err := regexp.Compile(regex)
 	if err != nil {
@@ -135,4 +133,8 @@ func (du *DIDURL) String() string {
 	}
 
 	return result
+}
+
+func (du *DIDURL) MarshalJSON() ([]byte, error) {
+	return json.Marshal(du.String())
 }

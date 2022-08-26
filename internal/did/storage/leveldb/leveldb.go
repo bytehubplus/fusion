@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/bytehubplus/did/internal/did/storage/spi"
 	"github.com/syndtr/goleveldb/leveldb"
-	"github.com/zRich/zFusion/storage/spi"
 )
 
 const (

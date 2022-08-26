@@ -2,6 +2,8 @@ package did
 
 import (
 	_ "embed"
+	"encoding/json"
+	"os"
 	"testing"
 )
 
@@ -44,6 +46,12 @@ func TestParseDocument(t *testing.T) {
 	}
 	for k, v := range doc.Service {
 		t.Logf("Service %d: %s", k, v)
+	}
+
+	data, err := json.Marshal(doc)
+	err = os.WriteFile("./marshal.json", data, 0644)
+	if err != nil {
+		t.Errorf("write file failed: %s", err)
 	}
 
 }
