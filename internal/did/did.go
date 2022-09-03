@@ -9,9 +9,24 @@ import (
 )
 
 type DID struct {
-	Scheme           string `json:"scheme,omitempty"`
-	Method           string `json:"method,omitempty"`
-	MethodSpecificID string `json:"methodSpecificID,omitempty"`
+	Scheme           string `json:"scheme"`
+	Method           string `json:"method"`
+	MethodSpecificID string `json:"methodSpecificID"`
+}
+
+func (did *DID) MarshalJSON() ([]byte, error) {
+	return json.Marshal(did.String())
+}
+
+func (did *DID) UnmarshalJSON(data []byte) error {
+	d, err := Parse(string(data))
+	if err != nil {
+		return err
+	}
+	did.Method = d.Method
+	did.Scheme = d.Scheme
+	did.MethodSpecificID = d.MethodSpecificID
+	return nil
 }
 
 // String returns a string representation of the DID
@@ -22,30 +37,15 @@ func (d *DID) String() string {
 	return fmt.Sprintf("%s:%s:%s", d.Scheme, d.Method, d.MethodSpecificID)
 }
 
-func (d *DID) UnmarshalJSON(bytes []byte) error {
-	var didString string
-	if err := json.Unmarshal(bytes, &didString); err != nil {
-		return fmt.Errorf("unmarshal DID failed: %w", err)
-	}
-
-	did, err := Parse(didString)
-	if err != nil {
-		return fmt.Errorf("parse DID string failed: %w", err)
-	}
-
-	*d = *did
-	return nil
-}
-
 // Parse parses a did string to DID struct
 func Parse(did string) (*DID, error) {
-	const idChar = `a-zA-Z0-9.-_`
-	const methodChar = `a-z0-9`
+	// const idChar = `a-zA-Z0-9.-_`
+	// const methodChar = `a-z0-9`
 	//
-	regex := fmt.Sprintf(`^did:[a-z][%s]+:(:+|[:%s]+)*[%%:%s]+[^:]$`, methodChar, methodChar, idChar)
+	// regex := fmt.Sprintf(`^did:[a-z][%s]+:(:+|[:%s]+)*[%%:%s]+[^:]$`, methodChar, methodChar, idChar)
 
-	// const idchar = `a-zA-Z0-9-_\.`
-	// regex := fmt.Sprintf(`^did:[a-z0-9]+:(:+|[:%s]+)*[%%:%s]+[^:]$`, idchar, idchar)
+	const idchar = `a-zA-Z0-9-_\.`
+	regex := fmt.Sprintf(`^did:[a-z0-9]+:(:+|[:%s]+)*[%%:%s]+[^:]$`, idchar, idchar)
 
 	result, err := regexp.Compile(regex)
 	if err != nil {
@@ -67,10 +67,30 @@ func Parse(did string) (*DID, error) {
 // https://www.w3.org/TR/2022/REC-did-core-20220719/#did-url-syntax
 // did-url = did path-abempty [ "?" query ] [ "#" fragment ]
 type DIDURL struct {
-	DID
-	Path     string
-	Queries  map[string][]string
-	Fragment string
+	DID      DID                 `json:"did,omitempty"`
+	Path     string              `json:"path,omitempty"`
+	Queries  map[string][]string `json:"queries,omitempty"`
+	Fragment string              `json:"fragment,omitempty"`
+}
+
+func (du *DIDURL) MarshalJSON() ([]byte, error) {
+	return json.Marshal(du.String())
+}
+
+func (du *DIDURL) UnmarshalJSON(data []byte) error {
+	didUrl, err := ParseDIDURL(string(data))
+	if err != nil {
+		return err
+	}
+	du.DID = didUrl.DID
+	du.Path = didUrl.Path
+	du.Queries = didUrl.Queries
+	du.Fragment = didUrl.Fragment
+	return nil
+}
+
+func (du *DIDURL) Relative() bool {
+	return du.DID.String() == "" || du.DID.String() == "::"
 }
 
 // Parses a string into DIDURL
@@ -133,8 +153,4 @@ func (du *DIDURL) String() string {
 	}
 
 	return result
-}
-
-func (du *DIDURL) MarshalJSON() ([]byte, error) {
-	return json.Marshal(du.String())
 }

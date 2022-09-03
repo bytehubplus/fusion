@@ -5,31 +5,115 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
-	"time"
 )
 
 type Document struct {
-	Context              []Context            `json:"@context,omitempty"`
-	ID                   DID                  `json:"id,omitempty"`
-	AlsoKnownas          []VerficationSet     `json:"alsoKnownas,omitempty"`
-	Controller           []DID                `json:"controller,omitempty"`
-	VerificationMethod   []VerificationMethod `json:"verificationMethod,omitempty"`
-	Authentication       []VerficationSet     `json:"authentication,omitempty"`
-	AssertionMethod      []VerficationSet     `json:"assertionMethod,omitempty"`
-	KeyAgreement         []VerficationSet     `json:"keyAgreement,omitempty"`
-	CapabilityInvocation []VerficationSet     `json:"capabilityInvocation,omitempty"`
-	CapabilityDelegation []VerficationSet     `json:"capabilityDelegation,omitempty"`
-	Service              []Service            `json:"service,omitempty"`
-	Created              *time.Time           `json:"created,omitempty"`
-	Updated              *time.Time           `json:"update,omitempty"`
+	Context              []Context
+	ID                   DID
+	AlsoKnownas          []string
+	Controller           []DID
+	VerificationMethod   []VerificationMethod
+	Authentication       []Verification
+	AssertionMethod      []Verification
+	KeyAgreement         []Verification
+	CapabilityInvocation []Verification
+	CapabilityDelegation []Verification
+	Service              []Service
 }
 
-type VerificationMethod struct {
-	ID                 DID          `json:"id"`
-	Controller         DID          `json:"controller"`
+type rawDocument struct {
+	Context              []string             `json:"context,omitempty"`
+	ID                   string               `json:"id,omitempty"`
+	AlsoKnownas          []string             `json:"alsoKnownas,omitempty"`
+	Controller           []string             `json:"controller,omitempty"`
+	VerificationMethod   []VerificationMethod `json:"verificationMethod,omitempty"`
+	Authentication       []Verification       `json:"authentication,omitempty"`
+	AssertionMethod      []Verification       `json:"assertionMethod,omitempty"`
+	KeyAgreement         []Verification       `json:"keyAgreement,omitempty"`
+	CapabilityInvocation []Verification       `json:"capabilityInvocation,omitempty"`
+	CapabilityDelegation []Verification       `json:"capabilityDelegation,omitempty"`
+	Service              []Service            `json:"service,omitempty"`
+}
+
+func (doc *Document) UnmarshalJSON(data []byte) error {
+	var rawDoc = &rawDocument{}
+	err := json.Unmarshal(data, &rawDoc)
+	if err != nil {
+		return fmt.Errorf("invalid DID document format: %s", err)
+	}
+
+	for _, ctx := range rawDoc.Context {
+		url, err := url.Parse(ctx)
+		if err != nil {
+			return fmt.Errorf("invalid context: %s", err)
+		}
+
+		doc.Context = append(doc.Context, Context{*url})
+	}
+
+	did, err := Parse(rawDoc.ID)
+	if err != nil {
+		return fmt.Errorf("invalid DID: %s", err)
+	}
+
+	doc.ID = *did
+
+	for _, controller := range rawDoc.Controller {
+		did, err := Parse(controller)
+		if err != nil {
+			return fmt.Errorf("invalid DID: %s", err)
+		}
+
+		doc.Controller = append(doc.Controller, *did)
+	}
+
+	doc.VerificationMethod = rawDoc.VerificationMethod
+	doc.Authentication = rawDoc.Authentication
+	doc.AssertionMethod = rawDoc.AssertionMethod
+	doc.KeyAgreement = rawDoc.KeyAgreement
+	doc.CapabilityInvocation = rawDoc.CapabilityInvocation
+	doc.CapabilityDelegation = rawDoc.CapabilityDelegation
+	doc.Service = rawDoc.Service
+	return nil
+}
+
+type rawVerificationMethod struct {
+	ID                 string       `json:"id"`
+	Controller         string       `json:"controller"`
 	Type               string       `json:"type"`
 	PublicKeyJwk       PublicKeyJwk `json:"publicKeyJwk,omitempty"`
 	PublicKeyMultibase string       `json:"publicKeyMultibase,omitempty"`
+}
+
+type VerificationMethod struct {
+	ID                 DIDURL       `json:"id,ignore"`
+	Controller         DID          `json:"controller,ignore"`
+	Type               string       `json:"type,ignore"`
+	PublicKeyJwk       PublicKeyJwk `json:"publicKeyJwk,omitempty,ignore"`
+	PublicKeyMultibase string       `json:"publicKeyMultibase,omitempty,ignore"`
+}
+
+func (vm *VerificationMethod) UnmarshalJSON(data []byte) error {
+	var rvm rawVerificationMethod
+	err := json.Unmarshal(data, &rvm)
+	if err != nil {
+		return err
+	}
+	didUrl, err := ParseDIDURL(rvm.ID)
+	if err != nil {
+		return err
+	}
+	vm.ID = *didUrl
+	did, err := Parse(rvm.Controller)
+	if err != nil {
+		return err
+	}
+	vm.Controller = *did
+
+	vm.Type = rvm.Type
+	vm.PublicKeyJwk = rvm.PublicKeyJwk
+	vm.PublicKeyMultibase = rvm.PublicKeyMultibase
+	return nil
 }
 
 type PublicKeyJwk struct {
@@ -39,21 +123,20 @@ type PublicKeyJwk struct {
 	Kid string `json:"kid,omitempty"`
 }
 
-type VerficationSet struct {
+// https://www.w3.org/TR/did-core/#referring-to-verification-methods
+// a verfication either contains a referring id or a verification method.
+type Verification struct {
 	VerificationMethod VerificationMethod
 	Id                 DIDURL
+	// a VerficationRelationship is ether embeded or referenced
+	// Embedded has higher priority
+	Embedded bool
+	//https://www.w3.org/TR/did-core/#relative-did-urls
+	// not implemented yet
+	Relative bool
 }
 
-func (vr *VerficationSet) String() string {
-	vmEmpty := VerificationMethod{}
-	if vr.VerificationMethod != vmEmpty {
-		return fmt.Sprint(vr.VerificationMethod)
-	} else {
-		return fmt.Sprint(vr.Id.String())
-	}
-}
-
-func (vr *VerficationSet) UnmarshalJSON(bytes []byte) error {
+func (vr *Verification) UnmarshalJSON(bytes []byte) error {
 	var i interface{}
 	err := json.Unmarshal(bytes, &i)
 	if err != nil {
@@ -61,20 +144,25 @@ func (vr *VerficationSet) UnmarshalJSON(bytes []byte) error {
 	}
 
 	switch v := i.(type) {
+	//referring verification method. it's a DID URL
 	case string:
 		didUrl, err := ParseDIDURL(v)
 		if err != nil {
 			return fmt.Errorf("invalid DID URL: %s", err)
 		}
 		vr.Id = *didUrl
+	//embedded verfication method. it's a verification method
 	case map[string]interface{}:
+		vm := VerificationMethod{}
+
 		_, found := v["id"]
 		if found {
-			vr.VerificationMethod.ID = v["id"].(string)
+			didUrl, _ := ParseDIDURL(v["id"].(string))
+			vm.ID = *didUrl
 		}
 		_, found = v["type"]
 		if found {
-			vr.VerificationMethod.Type = v["type"].(string)
+			vm.Type = v["type"].(string)
 		}
 		_, found = v["controller"]
 		if found {
@@ -82,11 +170,11 @@ func (vr *VerficationSet) UnmarshalJSON(bytes []byte) error {
 			if err != nil {
 				return fmt.Errorf("parse DID URL failed: %s", err)
 			}
-			vr.VerificationMethod.Controller = didUrl.DID
+			vm.Controller = didUrl.DID
 		}
 		_, found = v["publicKeyHex"]
 		if found {
-			vr.VerificationMethod.PublicKeyMultibase = v["publicKeyHex"].(string)
+			vm.PublicKeyMultibase = v["publicKeyHex"].(string)
 		}
 		var jwk PublicKeyJwk
 		_, found = v["publickeyjwk"]
@@ -95,8 +183,11 @@ func (vr *VerficationSet) UnmarshalJSON(bytes []byte) error {
 			if err != nil {
 				return fmt.Errorf("unmarshal publick key jwk failed: %s", err)
 			}
-			vr.VerificationMethod.PublicKeyJwk = jwk
+			vm.PublicKeyJwk = jwk
 		}
+		vr.VerificationMethod = vm
+	default:
+		return fmt.Errorf("invalid verfication")
 	}
 	return nil
 }
@@ -105,9 +196,9 @@ type PublicKey struct {
 }
 
 type Service struct {
-	ID              URI              `json:"id"`
-	Type            string           `json:"type"`
-	ServiceEndpoint []VerficationSet `json:"serviceEndpoint"`
+	ID              URI      `json:"id"`
+	Type            []string `json:"type"`
+	ServiceEndpoint []string `json:"serviceEndpoint"`
 }
 
 func (s *Service) UnmarshalJSON(bytes []byte) error {
@@ -124,24 +215,20 @@ func (s *Service) UnmarshalJSON(bytes []byte) error {
 			s.ID = URI{*uri}
 
 		case "type":
-			s.Type = value.(string)
+			s.Type = append(s.Type, value.(string))
 
 		case "serviceendpoint":
 			// v := value.(type)
 			switch value.(type) {
 			case string:
-				didUrl, err := ParseDIDURL(value.(string))
-				if err != nil {
-					return fmt.Errorf("parse DID URL failed: %s", err)
-				}
-				s.ServiceEndpoint = append(s.ServiceEndpoint, VerficationSet{Id: *didUrl})
+				s.ServiceEndpoint = append(s.ServiceEndpoint, value.(string))
 			case map[string]interface{}:
 				var vm VerificationMethod
 				err = json.Unmarshal([]byte(fmt.Sprintf("%v", value)), &vm)
 				if err != nil {
 					return fmt.Errorf("unmarshal verfication method failed: %s", err)
 				}
-				s.ServiceEndpoint = append(s.ServiceEndpoint, VerficationSet{VerificationMethod: vm})
+				s.ServiceEndpoint = append(s.ServiceEndpoint, value.(string))
 			}
 
 		}

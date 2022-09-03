@@ -23,9 +23,11 @@ var (
 )
 
 func TestParseDocument(t *testing.T) {
-	doc, err := ParseDocument([]byte(did1Json))
+	// doc, err := ParseDocument([]byte(did1Json))
+	var doc Document
+	err := json.Unmarshal([]byte(validDoc), &doc)
 	if err != nil {
-		t.Errorf("parse document failed: %s", err)
+		t.Fatalf("parse document failed: %s", err)
 	}
 
 	t.Logf("id: %s", doc.ID.String())
@@ -35,17 +37,17 @@ func TestParseDocument(t *testing.T) {
 	for k, v := range doc.VerificationMethod {
 		t.Logf("Verfication Method %d: %s", k, v.ID)
 	}
-	for k, v := range doc.Authentication {
-		t.Logf("Authentication %d: %s", k, v.String())
-	}
-	for k, v := range doc.AssertionMethod {
-		t.Logf("Asseert Method %d: %s", k, v.String())
-	}
-	for k, v := range doc.CapabilityDelegation {
-		t.Logf("Capability Delegation %d: %s", k, v.String())
-	}
+	// for k, v := range doc.Authentication {
+	// 	t.Logf("Authentication %d: %s", k, v.String())
+	// }
+	// for k, v := range doc.AssertionMethod {
+	// 	t.Logf("Asseert Method %d: %s", k, v.String())
+	// }
+	// for k, v := range doc.CapabilityDelegation {
+	// 	t.Logf("Capability Delegation %d: %s", k, v.String())
+	// }
 	for k, v := range doc.Service {
-		t.Logf("Service %d: %s", k, v)
+		t.Logf("Service %d: %s", k, v.ID.String())
 	}
 
 	data, err := json.Marshal(doc)
