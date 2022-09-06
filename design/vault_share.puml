@@ -1,0 +1,12 @@
+@startuml
+actor  Alice #red
+actor  Bob #green
+entity "Alice's Vault" as AV #yellow
+
+Alice -> Alice: Create Proof for Bob
+Alice -> Bob: Send Proof
+Bob -> AV: Access Request
+AV -> AV: Verify Proof
+AV -> AV: Encrypt With Bob's Key
+AV -> Bob: Response
+@enduml
