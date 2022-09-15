@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/bytehubplus/did/did/storage/spi"
+	"github.com/bytehubplus/fusion/did/storage/spi"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 

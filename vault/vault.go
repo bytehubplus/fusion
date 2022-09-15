@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/bytehubplus/did/did"
+	"github.com/bytehubplus/fusion/did"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/opt"
 )
@@ -25,13 +25,19 @@ type KvVault struct {
 	lock sync.RWMutex
 }
 
+// Controllers returns vault's controllers
 func (k *KvVault) Controllers() []string {
-	rawData, err := k.Get("doc")
-	if err != nil {
-		return err
-	}
+	var result []string
+	// rawData, err := k.Get("doc")
+	// if err != nil {
+	// 	return result
+	// }
 
-	doc, err := did.ParseDocument(rawData)
+	return result
+	// doc, err := did.ParseDocument(rawData)
+	// for _, v := range doc.Controllers {
+
+	// }
 }
 
 // PutEntry saves an entry data into vault, return entry's unique id if successful, otherwise return error
@@ -97,7 +103,7 @@ func (p *Provider) OpenWithDid(did did.DID) (Vault, error) {
 // param
 func (p *Provider) CreateVault(doc did.Document) (Vault, error) {
 	//create but not open existing
-	db, err := leveldb.OpenFile(fmt.Sprintf("%s/%s", p.RootFSPath, p.createVaultID(doc)), &opt.Options{ErrorIfExist: true})
+	db, err := leveldb.OpenFile(fmt.Sprintf("%s/%s", p.RootFSPath, p.createVaultID(doc.ID)), &opt.Options{ErrorIfExist: true})
 	if err != nil {
 		return nil, err
 	}
