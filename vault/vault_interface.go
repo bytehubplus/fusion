@@ -1,6 +1,6 @@
 package vault
 
-import "github.com/bytehubplus/did/did"
+import "github.com/bytehubplus/fusion/did"
 
 // vault is a sensetive data storage unit which can store one or more data entry in KV format
 // did used as vault for being identification, authentication/authorization etc.
