@@ -12,17 +12,29 @@ import (
 )
 
 var (
+	// Vault meta data prefix
+	MetaPrefix []byte = []byte("VM")
+	// Vault data entry prefix
 	EntryPrefix []byte = []byte("VE")
 )
 
-// / KvVault, Vault in KV database
+// KvVault, Vault in KV database
 type KvVault struct {
 	db   *leveldb.DB
 	Did  did.DID
 	lock sync.RWMutex
 }
 
-// PutEntry saves an entry into vault, return entry's unique id if successful, otherwise return error
+func (k *KvVault) Controllers() []string {
+	rawData, err := k.Get("doc")
+	if err != nil {
+		return err
+	}
+
+	doc, err := did.ParseDocument(rawData)
+}
+
+// PutEntry saves an entry data into vault, return entry's unique id if successful, otherwise return error
 func (k *KvVault) PutEntry(entry []byte) ([]byte, error) {
 	hash := sha256.Sum256(entry)
 	key := fmt.Sprintf("%s%s", EntryPrefix, hash[:])
@@ -83,16 +95,18 @@ func (p *Provider) OpenWithDid(did did.DID) (Vault, error) {
 
 // CreateVault creates a new vault
 // param
-func (p *Provider) CreateVault(did did.DID) (Vault, error) {
+func (p *Provider) CreateVault(doc did.Document) (Vault, error) {
 	//create but not open existing
-	db, err := leveldb.OpenFile(fmt.Sprintf("%s/%s", p.RootFSPath, p.createVaultID(did)), &opt.Options{ErrorIfExist: true})
+	db, err := leveldb.OpenFile(fmt.Sprintf("%s/%s", p.RootFSPath, p.createVaultID(doc)), &opt.Options{ErrorIfExist: true})
 	if err != nil {
 		return nil, err
 	}
 
 	vault := KvVault{db: db}
-	didValue := did.String()
+	didValue := doc.ID.String()
 	vault.Put("did", []byte(didValue))
+	raw, _ := doc.ID.MarshalJSON()
+	vault.Put("doc", raw)
 
 	return &vault, nil
 }
