@@ -86,11 +86,11 @@ type rawVerificationMethod struct {
 }
 
 type VerificationMethod struct {
-	ID                 DIDURL       `json:"id,ignore"`
-	Controller         DID          `json:"controller,ignore"`
-	Type               string       `json:"type,ignore"`
-	PublicKeyJwk       PublicKeyJwk `json:"publicKeyJwk,omitempty,ignore"`
-	PublicKeyMultibase string       `json:"publicKeyMultibase,omitempty,ignore"`
+	ID                 DIDURL       `json:"id,omitempty"`
+	Controller         DID          `json:"controller,omitempty"`
+	Type               string       `json:"type,omitempty"`
+	PublicKeyJwk       PublicKeyJwk `json:"publicKeyJwk,omitempty"`
+	PublicKeyMultibase string       `json:"publicKeyMultibase,omitempty"`
 }
 
 func (vm *VerificationMethod) UnmarshalJSON(data []byte) error {

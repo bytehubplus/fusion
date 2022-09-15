@@ -31,7 +31,7 @@ func (did *DID) UnmarshalJSON(data []byte) error {
 
 // String returns a string representation of the DID
 func (d *DID) String() string {
-	if d.Scheme != "" && d.Method != "" && d.MethodSpecificID != "" {
+	if d.Scheme == "" && d.Method == "" && d.MethodSpecificID == "" {
 		return ""
 	}
 	return fmt.Sprintf("%s:%s:%s", d.Scheme, d.Method, d.MethodSpecificID)
