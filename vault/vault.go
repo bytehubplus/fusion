@@ -11,6 +11,10 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/opt"
 )
 
+var (
+	EntryPrefix []byte = []byte("VE")
+)
+
 // / KvVault, Vault in KV database
 type KvVault struct {
 	db   *leveldb.DB
@@ -18,8 +22,20 @@ type KvVault struct {
 	lock sync.RWMutex
 }
 
+// PutEntry saves an entry into vault, return entry's unique id if successful, otherwise return error
+func (k *KvVault) PutEntry(entry []byte) ([]byte, error) {
+	hash := sha256.Sum256(entry)
+	key := fmt.Sprintf("%s%s", EntryPrefix, hash[:])
+	err := k.Put(key, entry)
+	if err != nil {
+		return hash[:], nil
+	}
+	return nil, err
+}
+
 func (k *KvVault) GetEntry(Id string) ([]byte, error) {
-	panic("not implemented") // TODO: Implement
+	key := fmt.Sprintf("%s%s", EntryPrefix, Id)
+	return k.Get(key)
 }
 
 func (k *KvVault) Get(key string) ([]byte, error) {

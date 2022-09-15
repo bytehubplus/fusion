@@ -15,6 +15,7 @@ type Vault interface {
 	Delete(key string) error
 	VaultID() string
 	GetEntry(Id string) ([]byte, error)
+	PutEntry(entry []byte) ([]byte, error)
 }
 
 type VaultProvider interface {
