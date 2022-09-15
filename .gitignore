@@ -16,3 +16,5 @@
 
 # LevelDB data directory
 internal/did/storage/leveldb/data-did/
+testdata
+data
