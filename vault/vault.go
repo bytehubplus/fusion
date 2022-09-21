@@ -25,19 +25,19 @@ type KvVault struct {
 	lock sync.RWMutex
 }
 
-// Controllers returns vault's controllers
+// Controllers returns vault's controller DIDs
 func (k *KvVault) Controllers() []string {
 	var result []string
-	// rawData, err := k.Get("doc")
-	// if err != nil {
-	// 	return result
-	// }
+	rawData, err := k.Get("doc")
+	if err != nil {
+		return result
+	}
 
+	doc, err := did.ParseDocument(rawData)
+	for _, v := range doc.Controller {
+		result = append(result, v.String())
+	}
 	return result
-	// doc, err := did.ParseDocument(rawData)
-	// for _, v := range doc.Controllers {
-
-	// }
 }
 
 // PutEntry saves an entry data into vault, return entry's unique id if successful, otherwise return error

@@ -1,12 +1,13 @@
 @startuml
-actor  Alice #red
-actor  Bob #green
-entity "Alice's Vault" as AV #yellow
+actor  Alice 
+actor  Bob 
+boundary Node
+entity "Alice's Vault" as AV 
 
-Alice -> Alice: Create Proof for Bob
-Alice -> Bob: Send Proof
-Bob -> AV: Access Request
-AV -> AV: Verify Proof
-AV -> AV: Encrypt With Bob's Key
-AV -> Bob: Response
+Alice -> Alice: Create Access Credential for Bob
+Alice -> Bob: Send Credential
+Bob -> Node: Access Request
+Node -> Node: Authorizaion
+Node -> AV: Get Data
+Node -> Bob: Response
 @enduml
