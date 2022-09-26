@@ -14,13 +14,16 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-package did
+
+package store
 
 import (
-	_ "embed"
 	"encoding/json"
-	"os"
 	"testing"
+
+	_ "embed"
+
+	"github.com/bytehubplus/fusion/did"
 )
 
 var (
@@ -38,38 +41,43 @@ var (
 	did1Json string
 )
 
-func TestParseDocument(t *testing.T) {
-	// doc, err := ParseDocument([]byte(did1Json))
-	var doc Document
-	err := json.Unmarshal([]byte(validDoc), &doc)
+func TestSaveDocument(t *testing.T) {
+	conf := &StoreConfig{
+		DBPath: "./data",
+		Schema: "did",
+		Method: "rich",
+	}
+	sp, err := NewProvider(*conf)
 	if err != nil {
-		t.Fatalf("parse document failed: %s", err)
+		t.Logf("create store provider failed")
 	}
 
-	t.Logf("id: %s", doc.ID.String())
-	for k, v := range doc.Controller {
-		t.Logf("Controller %d: %s", k, v.String())
-	}
-	for k, v := range doc.VerificationMethod {
-		t.Logf("Verfication Method %d: %s", k, v.ID)
-	}
-	// for k, v := range doc.Authentication {
-	// 	t.Logf("Authentication %d: %s", k, v.String())
-	// }
-	// for k, v := range doc.AssertionMethod {
-	// 	t.Logf("Asseert Method %d: %s", k, v.String())
-	// }
-	// for k, v := range doc.CapabilityDelegation {
-	// 	t.Logf("Capability Delegation %d: %s", k, v.String())
-	// }
-	for k, v := range doc.Service {
-		t.Logf("Service %d: %s", k, v.ID.String())
-	}
+	store, err := sp.OpenStore()
+	var doc did.Document
+	json.Unmarshal([]byte(did1Json), &doc)
+	// doc, err := did.ParseDocument([]byte(did1Json))
+	key, err := store.SaveDocument(doc)
+	sp.CloseStore()
+	t.Logf("DID Document saved. key : %s\n", key)
+}
 
-	data, err := json.Marshal(doc)
-	err = os.WriteFile("./marshal.json", data, 0644)
+func TestLoadDocument(t *testing.T) {
+
+	conf := &StoreConfig{
+		DBPath: "./data",
+		Schema: "did",
+		Method: "rich",
+	}
+	sp, err := NewProvider(*conf)
 	if err != nil {
-		t.Errorf("write file failed: %s", err)
+		t.Logf("create store provider failed")
 	}
 
+	store, err := sp.OpenStore()
+
+	key := "7aa773c9c3f0a1856663adbdc55d1eda6d2527b7"
+	document, err := store.LoadDocument(key)
+
+	sp.CloseStore()
+	t.Logf("did : %s", document.ID.String())
 }

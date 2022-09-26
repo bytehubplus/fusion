@@ -1,3 +1,20 @@
+// The AGPLv3 License (AGPLv3)
+
+// Copyright (c) 2022 ZHAO Zhenhua <zhao.zhenhua@gmail.com>
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 package did
 
 import (
@@ -23,7 +40,7 @@ type Document struct {
 
 type rawDocument struct {
 	Context              []string             `json:"context,omitempty"`
-	ID                   string               `json:"id,omitempty"`
+	ID                   string               `json:"id"`
 	AlsoKnownas          []string             `json:"alsoKnownas,omitempty"`
 	Controller           []string             `json:"controller,omitempty"`
 	VerificationMethod   []VerificationMethod `json:"verificationMethod,omitempty"`
@@ -192,13 +209,26 @@ func (vr *Verification) UnmarshalJSON(bytes []byte) error {
 	return nil
 }
 
+type URI struct {
+	url.URL
+}
+
+// func (u URI) MarshalJSON() ([]byte, error) {
+// 	return json.Marshal(u)
+// }
+
+// func (u *URI) UnmarshalJSON(bytes []byte) error {
+// 	return json.Unmarshal(bytes, u)
+// }
+
 type PublicKey struct {
 }
 
 type Service struct {
-	ID              URI      `json:"id"`
-	Type            []string `json:"type"`
-	ServiceEndpoint []string `json:"serviceEndpoint"`
+	ID   URI      `json:"id"`
+	Type []string `json:"type"`
+	// ServiceEndpoint []string `json:"serviceEndpoint"`
+	ServiceEndpoint interface{} `json:"serviceEndpoint"`
 }
 
 func (s *Service) UnmarshalJSON(bytes []byte) error {
@@ -207,33 +237,33 @@ func (s *Service) UnmarshalJSON(bytes []byte) error {
 	if err != nil {
 		return fmt.Errorf("unmarshal service failed: %s", err)
 	}
-
 	for field, value := range item {
 		switch strings.ToLower(field) {
 		case "id":
-			uri, _ := url.Parse(value.(string))
-			s.ID = URI{*uri}
-
+			// uri, _ := url.Parse(value.(string))
+			// s.ID = URI{*uri}
+			var url url.URL
+			json.Unmarshal(value.([]byte), &url)
+			// json.Unmarshal(value.([]byte), s.ID)
 		case "type":
 			s.Type = append(s.Type, value.(string))
-
+			// json.Unmarshal(value.([]byte), s.Type)
 		case "serviceendpoint":
-			// v := value.(type)
 			switch value.(type) {
 			case string:
-				s.ServiceEndpoint = append(s.ServiceEndpoint, value.(string))
-			case map[string]interface{}:
-				var vm VerificationMethod
-				err = json.Unmarshal([]byte(fmt.Sprintf("%v", value)), &vm)
-				if err != nil {
-					return fmt.Errorf("unmarshal verfication method failed: %s", err)
-				}
-				s.ServiceEndpoint = append(s.ServiceEndpoint, value.(string))
+				// s.ServiceEndpoint = append(s.ServiceEndpoint, value.(string))
+				s.ServiceEndpoint = value
+				// case map[string]interface{}:
+				// 	var vm VerificationMethod
+				// 	err = json.Unmarshal([]byte(fmt.Sprintf("%v", value)), &vm)
+				// 	if err != nil {
+				// 		return fmt.Errorf("unmarshal verfication method failed: %s", err)
+				// 	}
+				// 	s.ServiceEndpoint = append(s.ServiceEndpoint, value.(string))
 			}
 
 		}
 	}
-
 	return nil
 }
 
@@ -241,19 +271,19 @@ type Context struct {
 	url.URL
 }
 
-func (ctx *Context) UnmarshalJSON(bytes []byte) error {
-	var value string
-	if err := json.Unmarshal(bytes, &value); err != nil {
-		return err
-	}
+// func (ctx *Context) UnmarshalJSON(bytes []byte) error {
+// 	var value string
+// 	if err := json.Unmarshal(bytes, &value); err != nil {
+// 		return err
+// 	}
 
-	parsedUrl, err := url.Parse(value)
-	if err != nil {
-		return fmt.Errorf("could not parse URI: %w", err)
-	}
-	ctx.URL = *parsedUrl
-	return nil
-}
+// 	parsedUrl, err := url.Parse(value)
+// 	if err != nil {
+// 		return fmt.Errorf("could not parse URI: %w", err)
+// 	}
+// 	ctx.URL = *parsedUrl
+// 	return nil
+// }
 
 func ParseDocument(bytes []byte) (*Document, error) {
 	var doc Document
@@ -262,5 +292,4 @@ func ParseDocument(bytes []byte) (*Document, error) {
 	}
 
 	return &doc, nil
-
 }
