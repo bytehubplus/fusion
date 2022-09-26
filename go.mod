@@ -29,5 +29,6 @@ require (
 require (
 	github.com/ethereum/go-ethereum v1.10.25
 	github.com/gin-gonic/gin v1.8.1
+	github.com/nuts-foundation/go-did v0.3.0
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 )

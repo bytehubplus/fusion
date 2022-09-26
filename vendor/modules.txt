@@ -68,7 +68,8 @@ github.com/modern-go/concurrent
 ## explicit; go 1.12
 github.com/modern-go/reflect2
 # github.com/nuts-foundation/go-did v0.3.0
-## explicit
+## explicit; go 1.15
+github.com/nuts-foundation/go-did
 # github.com/pelletier/go-toml/v2 v2.0.5
 ## explicit; go 1.16
 github.com/pelletier/go-toml/v2

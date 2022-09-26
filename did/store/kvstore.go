@@ -25,7 +25,7 @@ import (
 	"fmt"
 
 	// "github.com/bytehubplus/fusion/did"
-	did "github.com/nut-foun"
+	did "github.com/nuts-foundation/go-did"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
@@ -66,7 +66,7 @@ func (sp *StoreProvider) CloseStore() {
 	sp.Store.db.Close()
 }
 
-func (k *KvStore) SaveDocument(doc did.Document) (string, error) {
+func (k *KvStore) SaveDocument(doc did.KeyType) (string, error) {
 	key := k.KeyGenerate([]byte(doc.ID.String()))
 	rawData, err := json.Marshal(doc)
 	if err != nil {
