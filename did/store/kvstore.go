@@ -24,7 +24,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/bytehubplus/fusion/did"
+	// "github.com/bytehubplus/fusion/did"
+	did "github.com/nut-foun"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
