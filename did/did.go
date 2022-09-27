@@ -14,6 +14,7 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 package did
 
 import (
@@ -30,14 +31,19 @@ type DID struct {
 	MethodSpecificID string `json:"methodSpecificID"`
 }
 
-func (did *DID) MarshalJSON() ([]byte, error) {
+func (did DID) MarshalJSON() ([]byte, error) {
 	return json.Marshal(did.String())
 }
 
 func (did *DID) UnmarshalJSON(data []byte) error {
-	d, err := Parse(string(data))
+	var didString string
+
+	if err := json.Unmarshal(data, &didString); err != nil {
+		return fmt.Errorf("could not unmarshal into DID: %w", err)
+	}
+	d, err := Parse(didString)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not parse into DID: %w", err)
 	}
 	did.Method = d.Method
 	did.Scheme = d.Scheme

@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
-	"strings"
 )
 
 type Document struct {
@@ -94,13 +93,13 @@ func (doc *Document) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type rawVerificationMethod struct {
-	ID                 string       `json:"id"`
-	Controller         string       `json:"controller"`
-	Type               string       `json:"type"`
-	PublicKeyJwk       PublicKeyJwk `json:"publicKeyJwk,omitempty"`
-	PublicKeyMultibase string       `json:"publicKeyMultibase,omitempty"`
-}
+// type rawVerificationMethod struct {
+// 	ID                 string       `json:"id"`
+// 	Controller         string       `json:"controller"`
+// 	Type               string       `json:"type"`
+// 	PublicKeyJwk       PublicKeyJwk `json:"publicKeyJwk,omitempty"`
+// 	PublicKeyMultibase string       `json:"publicKeyMultibase,omitempty"`
+// }
 
 type VerificationMethod struct {
 	ID                 DIDURL       `json:"id,omitempty"`
@@ -110,28 +109,28 @@ type VerificationMethod struct {
 	PublicKeyMultibase string       `json:"publicKeyMultibase,omitempty"`
 }
 
-func (vm *VerificationMethod) UnmarshalJSON(data []byte) error {
-	var rvm rawVerificationMethod
-	err := json.Unmarshal(data, &rvm)
-	if err != nil {
-		return err
-	}
-	didUrl, err := ParseDIDURL(rvm.ID)
-	if err != nil {
-		return err
-	}
-	vm.ID = *didUrl
-	did, err := Parse(rvm.Controller)
-	if err != nil {
-		return err
-	}
-	vm.Controller = *did
+// func (vm *VerificationMethod) UnmarshalJSON(data []byte) error {
+// 	var rvm rawVerificationMethod
+// 	err := json.Unmarshal(data, &rvm)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	didUrl, err := ParseDIDURL(rvm.ID)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	vm.ID = *didUrl
+// 	did, err := Parse(rvm.Controller)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	vm.Controller = *did
 
-	vm.Type = rvm.Type
-	vm.PublicKeyJwk = rvm.PublicKeyJwk
-	vm.PublicKeyMultibase = rvm.PublicKeyMultibase
-	return nil
-}
+// 	vm.Type = rvm.Type
+// 	vm.PublicKeyJwk = rvm.PublicKeyJwk
+// 	vm.PublicKeyMultibase = rvm.PublicKeyMultibase
+// 	return nil
+// }
 
 type PublicKeyJwk struct {
 	Crv string `json:"crv,omitempty"`
@@ -213,77 +212,131 @@ type URI struct {
 	url.URL
 }
 
-// func (u URI) MarshalJSON() ([]byte, error) {
-// 	return json.Marshal(u)
-// }
+func (u URI) MarshalJSON() ([]byte, error) {
+	return json.Marshal(u.String())
+}
 
-// func (u *URI) UnmarshalJSON(bytes []byte) error {
-// 	return json.Unmarshal(bytes, u)
-// }
+func (u *URI) UnmarshalJSON(bytes []byte) error {
+	var value string
+	if err := json.Unmarshal(bytes, &value); err != nil {
+		return err
+	}
+
+	url, err := url.Parse(value)
+	if err != nil {
+		return fmt.Errorf("could not parse URI: %w", err)
+	}
+	u.URL = *url
+	return nil
+}
 
 type PublicKey struct {
 }
 
 type Service struct {
-	ID   URI      `json:"id"`
-	Type []string `json:"type"`
-	// ServiceEndpoint []string `json:"serviceEndpoint"`
-	ServiceEndpoint interface{} `json:"serviceEndpoint"`
+	ID              URI      `json:"id"`
+	Type            []string `json:"type"`
+	ServiceEndpoint []string `json:"serviceEndpoint"`
+	// ServiceEndpoint interface{} `json:"serviceEndpoint"`
 }
 
-func (s *Service) UnmarshalJSON(bytes []byte) error {
-	var item map[string]interface{}
-	err := json.Unmarshal(bytes, &item)
-	if err != nil {
-		return fmt.Errorf("unmarshal service failed: %s", err)
-	}
-	for field, value := range item {
-		switch strings.ToLower(field) {
-		case "id":
-			// uri, _ := url.Parse(value.(string))
-			// s.ID = URI{*uri}
-			var url url.URL
-			json.Unmarshal(value.([]byte), &url)
-			// json.Unmarshal(value.([]byte), s.ID)
-		case "type":
-			s.Type = append(s.Type, value.(string))
-			// json.Unmarshal(value.([]byte), s.Type)
-		case "serviceendpoint":
-			switch value.(type) {
-			case string:
-				// s.ServiceEndpoint = append(s.ServiceEndpoint, value.(string))
-				s.ServiceEndpoint = value
-				// case map[string]interface{}:
-				// 	var vm VerificationMethod
-				// 	err = json.Unmarshal([]byte(fmt.Sprintf("%v", value)), &vm)
-				// 	if err != nil {
-				// 		return fmt.Errorf("unmarshal verfication method failed: %s", err)
-				// 	}
-				// 	s.ServiceEndpoint = append(s.ServiceEndpoint, value.(string))
-			}
+// func (s Service) MarshalJSON() ([]byte, error) {
+// 	type alias Service
+// 	tmp := alias(s)
+// 	if data, err := json.Marshal(tmp); err != nil {
+// 		return nil, err
+// 	} else {
+// 		return marshal.NormalizeDocument(data, marshal.Unplural("serviceEndpointKey"))
+// 	}
+// }
 
-		}
-	}
-	return nil
-}
+// func (s *Service) UnmarshalJSON(data []byte) error {
+// 	pluralContext := marshal.Plural("@context")
+// 	normalizedData, err := marshal.NormalizeDocument(data, pluralContext, marshal.PluralValueOrMap("serviceEndpointKey"))
+// 	if err != nil {
+// 		return err
+// 	}
+// 	type alias Service
+// 	var result alias
+// 	if err := json.Unmarshal(normalizedData, &result); err != nil {
+// 		return err
+// 	}
+// 	*s = (Service)(result)
+// 	return nil
+// }
+
+// // Unmarshal unmarshalls the service endpoint into a domain-specific type.
+// func (s Service) UnmarshalServiceEndpoint(target interface{}) error {
+// 	var valueToMarshal interface{}
+// 	if asSlice, ok := s.ServiceEndpoint.([]interface{}); ok && len(asSlice) == 1 {
+// 		valueToMarshal = asSlice[0]
+// 	} else {
+// 		valueToMarshal = s.ServiceEndpoint
+// 	}
+// 	if asJSON, err := json.Marshal(valueToMarshal); err != nil {
+// 		return err
+// 	} else {
+// 		return json.Unmarshal(asJSON, target)
+// 	}
+// }
+
+// func (s *Service) UnmarshalJSON(bytes []byte) error {
+// 	var item map[string]interface{}
+// 	err := json.Unmarshal(bytes, &item)
+// 	if err != nil {
+// 		return fmt.Errorf("unmarshal service failed: %s", err)
+// 	}
+// 	for field, value := range item {
+// 		switch strings.ToLower(field) {
+// 		case "id":
+// 			// uri, _ := url.Parse(value.(string))
+// 			// s.ID = URI{*uri}
+// 			var url url.URL
+// 			json.Unmarshal(value.([]byte), &url)
+// 			// json.Unmarshal(value.([]byte), s.ID)
+// 		case "type":
+// 			s.Type = append(s.Type, value.(string))
+// 			// json.Unmarshal(value.([]byte), s.Type)
+// 		case "serviceendpoint":
+// 			switch value.(type) {
+// 			case string:
+// 				// s.ServiceEndpoint = append(s.ServiceEndpoint, value.(string))
+// 				s.ServiceEndpoint = value
+// 				// case map[string]interface{}:
+// 				// 	var vm VerificationMethod
+// 				// 	err = json.Unmarshal([]byte(fmt.Sprintf("%v", value)), &vm)
+// 				// 	if err != nil {
+// 				// 		return fmt.Errorf("unmarshal verfication method failed: %s", err)
+// 				// 	}
+// 				// 	s.ServiceEndpoint = append(s.ServiceEndpoint, value.(string))
+// 			}
+
+// 		}
+// 	}
+// 	return nil
+// }
 
 type Context struct {
 	url.URL
 }
 
-// func (ctx *Context) UnmarshalJSON(bytes []byte) error {
-// 	var value string
-// 	if err := json.Unmarshal(bytes, &value); err != nil {
-// 		return err
-// 	}
+func (ctx Context) MarshalJSON() ([]byte, error) {
+	return json.Marshal(ctx.String())
+}
 
-// 	parsedUrl, err := url.Parse(value)
-// 	if err != nil {
-// 		return fmt.Errorf("could not parse URI: %w", err)
-// 	}
-// 	ctx.URL = *parsedUrl
-// 	return nil
-// }
+func (ctx *Context) UnmarshalJSON(bytes []byte) error {
+	var value string
+	if err := json.Unmarshal(bytes, &value); err != nil {
+		return err
+	}
+
+	parsedUrl, err := url.Parse(value)
+	if err != nil {
+		return fmt.Errorf("could not parse URI: %w", err)
+	}
+	ctx.URL = *parsedUrl
+	return nil
+}
 
 func ParseDocument(bytes []byte) (*Document, error) {
 	var doc Document

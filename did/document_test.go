@@ -41,7 +41,7 @@ var (
 func TestParseDocument(t *testing.T) {
 	// doc, err := ParseDocument([]byte(did1Json))
 	var doc Document
-	err := json.Unmarshal([]byte(validDoc), &doc)
+	err := json.Unmarshal([]byte(did1Json), &doc)
 	if err != nil {
 		t.Fatalf("parse document failed: %s", err)
 	}
@@ -70,6 +70,22 @@ func TestParseDocument(t *testing.T) {
 	err = os.WriteFile("./marshal.json", data, 0644)
 	if err != nil {
 		t.Errorf("write file failed: %s", err)
+	}
+
+}
+
+func TestUnmarshalService(t *testing.T) {
+	var input Service
+	err := json.Unmarshal([]byte(`{
+  		  "id":"did:example:123#linked-domain",
+		  "type":"custom",
+		  "serviceEndpoint": "did:nuts:123456"
+}`), &input)
+
+	if err != nil {
+		t.Logf("Unmarshal service failed : %s", err)
+	} else {
+		t.Logf("Unmarshal service success. %s ", input.ServiceEndpoint[0])
 	}
 
 }

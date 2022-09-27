@@ -75,7 +75,7 @@ func TestLoadDocument(t *testing.T) {
 
 	store, err := sp.OpenStore()
 
-	key := "7aa773c9c3f0a1856663adbdc55d1eda6d2527b7"
+	key := "e3b0c44298fc1c149afbf4c8996fb92427ae41e4"
 	document, err := store.LoadDocument(key)
 
 	sp.CloseStore()
