@@ -27,17 +27,7 @@ import (
 )
 
 var (
-	//go:embed testdata/valid_doc.jsonld
-	validDoc string
-	//go:embed testdata/valid_doc_resolution.jsonld
-	validDocResolution string
-	//go:embed testdata/invalid_doc.jsonld
-	invalidDoc string
-	//go:embed testdata/valid_doc_v0.11.jsonld
-	validDocV011 string
-	//go:embed testdata/valid_doc_with_base.jsonld
-	validDocWithBase string
-	//go:embed testdata/did1.json
+	//go:embed test/did1.json
 	did1Json string
 )
 
@@ -75,7 +65,11 @@ func TestLoadDocument(t *testing.T) {
 
 	store, err := sp.OpenStore()
 
+<<<<<<< HEAD
 	key := "e3b0c44298fc1c149afbf4c8996fb92427ae41e4"
+=======
+	key := "9be627fdc3dae7d17f13fafa6df69d0f5325ba69"
+>>>>>>> nuts-did
 	document, err := store.LoadDocument(key)
 
 	sp.CloseStore()

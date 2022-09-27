@@ -21,7 +21,6 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/bytehubplus/fusion/did"
@@ -50,7 +49,7 @@ func (s *StoreProvider) OpenStore() (Store, error) {
 func NewProvider(conf StoreConfig) (*StoreProvider, error) {
 	db, err := leveldb.OpenFile(conf.DBPath, nil)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("failed to open database: %s", err))
+		return nil, fmt.Errorf("failed to open database: %s", err)
 	}
 	// defer db.Close()
 	store := &KvStore{db: db}
@@ -72,7 +71,7 @@ func (k *KvStore) SaveDocument(doc did.Document) (string, error) {
 		return "", err
 	}
 	if err := k.db.Put(key, rawData, nil); err != nil {
-		return "", errors.New(fmt.Sprintf("save document failed: %s", err))
+		return "", fmt.Errorf("save document failed: %s", err)
 	}
 
 	return bytes.NewBuffer(key).String(), nil
