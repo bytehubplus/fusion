@@ -1,84 +1,159 @@
-// The AGPLv3 License (AGPLv3)
-
-// Copyright (c) 2022 ZHAO Zhenhua <zhao.zhenhua@gmail.com>
-
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package did
 
 import (
 	"encoding/json"
-	"reflect"
+	"errors"
+	"fmt"
+	"io"
 	"testing"
+
+	ockamDid "github.com/ockam-network/did"
+	"github.com/stretchr/testify/assert"
 )
 
-// func TestString(t *testing.T) {
-// 	type fields struct {
-// 		Scheme           string
-// 		Method           string
-// 		MethodSpecificID string
-// 	}
-// 	tests := []struct {
-// 		name   string
-// 		fields fields
-// 		want   string
-// 	}{
-// 		// TODO: Add test cases.
-// 		{"case1", fields{Scheme: "did", Method: "example", MethodSpecificID: "1234567890"}, "did:example:1234567890"},
-// 		{"case2", fields{Scheme: "did", Method: "example", MethodSpecificID: "1234567890abcdef"}, "did:example:1234567890abcdef"},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			d := &DID{
-// 				Scheme:           tt.fields.Scheme,
-// 				Method:           tt.fields.Method,
-// 				MethodSpecificID: tt.fields.MethodSpecificID,
-// 			}
-// 			if got := d.String(); got != tt.want {
-// 				t.Errorf("DID.String() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+func TestDID_UnmarshalJSON(t *testing.T) {
+	jsonTestSting := `"did:nuts:123"`
 
-func TestParse(t *testing.T) {
-	type args struct {
-		did string
+	id := DID{}
+	err := json.Unmarshal([]byte(jsonTestSting), &id)
+	if err != nil {
+		t.Errorf("unexpected error: %s", err)
+		return
 	}
-	tests := []struct {
-		name    string
-		args    args
-		want    *DID
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := Parse(tt.args.did)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Parse() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Parse() = %v, want %v", got, tt.want)
-			}
-		})
+	if id.Method != "nuts" {
+		t.Errorf("expected nuts got %s", id.Method)
+		return
 	}
 }
 
-func TestMarshalDidURL(t *testing.T) {
-	did := DID{Scheme: "did", Method: "example", MethodSpecificID: "1234567890"}
-	data, _ := json.Marshal(did)
-	t.Logf("%s", data)
+func TestDID_MarshalJSON(t *testing.T) {
+	wrappedDid, err := ockamDid.Parse("did:nuts:123")
+	if err != nil {
+		t.Errorf("unexpected error: %s", err)
+		return
+	}
+	id := DID{*wrappedDid}
+	if err != nil {
+		t.Errorf("unexpected error: %s", err)
+		return
+	}
+	result, err := json.Marshal(id)
+	if string(result) != `"did:nuts:123"` {
+		t.Errorf("expected \"did:nuts:123\" got: %s", result)
+	}
+}
+
+func TestParseDID(t *testing.T) {
+	t.Run("parse a DID", func(t *testing.T) {
+		id, err := ParseDID("did:nuts:123")
+
+		if err != nil {
+			t.Errorf("unexpected error: %s", err)
+			return
+		}
+
+		if id.String() != "did:nuts:123" {
+			t.Errorf("expected parsed did to be 'did:nuts:123', got: %s", id.String())
+		}
+	})
+	t.Run("error - invalid DID", func(t *testing.T) {
+		id, err := ParseDID("invalidDID")
+		assert.Nil(t, id)
+		assert.EqualError(t, err, "invalid DID: input does not begin with 'did:' prefix")
+
+	})
+	t.Run("error - DID URL", func(t *testing.T) {
+		id, err := ParseDID("did:nuts:123/path?query#fragment")
+		assert.Nil(t, id)
+		assert.EqualError(t, err, "invalid DID: DID can not have path, fragment or query params")
+	})
+}
+
+func TestMustParseDID(t *testing.T) {
+	assert.Panics(t, func() {
+		MustParseDID("did:nuts:123/path?query#fragment")
+	})
+}
+
+func TestParseDIDURL(t *testing.T) {
+	t.Run("ok parse a DID", func(t *testing.T) {
+		id, err := ParseDIDURL("did:nuts:123")
+
+		if err != nil {
+			t.Errorf("unexpected error: %s", err)
+			return
+		}
+
+		if id.String() != "did:nuts:123" {
+			t.Errorf("expected parsed did to be 'did:nuts:123', got: %s", id.String())
+		}
+	})
+
+	t.Run("ok - parse a DID URL", func(t *testing.T) {
+		id, err := ParseDIDURL("did:nuts:123/path?query#fragment")
+		assert.Equal(t, "did:nuts:123/path?query#fragment", id.String())
+		assert.NoError(t, err)
+	})
+
+	t.Run("error - invalid DID", func(t *testing.T) {
+		id, err := ParseDIDURL("invalidDID")
+		assert.Nil(t, id)
+		assert.EqualError(t, err, "invalid DID: input does not begin with 'did:' prefix")
+
+	})
+}
+
+func TestMustParseDIDURL(t *testing.T) {
+	assert.Panics(t, func() {
+		MustParseDIDURL("invalidDID")
+	})
+}
+
+func TestDID_String(t *testing.T) {
+	expected := "did:nuts:123"
+	id, _ := ParseDID(expected)
+	assert.Equal(t, expected, fmt.Sprintf("%s", *id))
+}
+
+func TestDID_MarshalText(t *testing.T) {
+	expected := "did:nuts:123"
+	id, _ := ParseDID(expected)
+	actual, err := id.MarshalText()
+	assert.NoError(t, err)
+	assert.Equal(t, []byte(expected), actual)
+}
+
+func TestDID_Empty(t *testing.T) {
+	t.Run("not empty for filled did", func(t *testing.T) {
+		id, err := ParseDID("did:nuts:123")
+		if err != nil {
+			t.Errorf("unexpected error: %s", err)
+			return
+		}
+		assert.False(t, id.Empty())
+	})
+
+	t.Run("empty when just generated", func(t *testing.T) {
+		id := DID{}
+		assert.True(t, id.Empty())
+	})
+}
+
+func TestDID_URI(t *testing.T) {
+	id, err := ParseDID("did:nuts:123")
+
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	uri := id.URI()
+
+	assert.Equal(t, id.String(), uri.String())
+}
+
+func TestError(t *testing.T) {
+	actual := ErrInvalidDID.wrap(io.EOF)
+	assert.True(t, errors.Is(actual, ErrInvalidDID))
+	assert.True(t, errors.Is(actual, io.EOF))
+	assert.False(t, errors.Is(actual, io.ErrShortBuffer))
 }
