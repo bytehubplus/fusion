@@ -3,6 +3,7 @@ package vault
 import (
 	"crypto/sha256"
 	_ "embed"
+	"encoding/json"
 	"testing"
 
 	"github.com/bytehubplus/fusion/did"
@@ -22,8 +23,10 @@ func TestCreateHash(t *testing.T) {
 
 func TestCreateVault(t *testing.T) {
 	p := NewProvider("./data/")
-	doc, _ := did.ParseDocument([]byte(validDoc))
-	v, _ := p.CreateVault(*doc)
+	// doc, _ := did.ParseDocument([]byte(validDoc))
+	var doc did.Document
+	json.Unmarshal([]byte(did1Json), &doc)
+	v, _ := p.CreateVault(doc)
 	didValue, _ := v.Get("did")
 	t.Logf("did value: %s", didValue)
 }
