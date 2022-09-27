@@ -43,16 +43,16 @@ func TestSaveDocument(t *testing.T) {
 	}
 
 	store, err := sp.OpenStore()
+	defer sp.CloseStore()
 	var doc did.Document
+	// data, err := ioutil.ReadFile("./test/did1.json")
 	json.Unmarshal([]byte(did1Json), &doc)
 	// doc, err := did.ParseDocument([]byte(did1Json))
 	key, err := store.SaveDocument(doc)
-	sp.CloseStore()
 	t.Logf("DID Document saved. key : %s\n", key)
 }
 
 func TestLoadDocument(t *testing.T) {
-
 	conf := &StoreConfig{
 		DBPath: "./data",
 		Schema: "did",
@@ -65,9 +65,9 @@ func TestLoadDocument(t *testing.T) {
 
 	store, err := sp.OpenStore()
 
-	key := "e3b0c44298fc1c149afbf4c8996fb92427ae41e4"
+	defer sp.CloseStore()
+	key := "7aa773c9c3f0a1856663adbdc55d1eda6d2527b7"
 	document, err := store.LoadDocument(key)
 
-	sp.CloseStore()
 	t.Logf("did : %s", document.ID.String())
 }
