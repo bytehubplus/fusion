@@ -65,11 +65,7 @@ func TestLoadDocument(t *testing.T) {
 
 	store, err := sp.OpenStore()
 
-<<<<<<< HEAD
 	key := "e3b0c44298fc1c149afbf4c8996fb92427ae41e4"
-=======
-	key := "9be627fdc3dae7d17f13fafa6df69d0f5325ba69"
->>>>>>> nuts-did
 	document, err := store.LoadDocument(key)
 
 	sp.CloseStore()
