@@ -43,7 +43,7 @@ func TestSaveDocument(t *testing.T) {
 	}
 
 	store, err := sp.OpenStore()
-	defer sp.CloseStore()
+	// defer sp.CloseStore()
 	var doc did.Document
 	// data, err := ioutil.ReadFile("./test/did1.json")
 	json.Unmarshal([]byte(did1Json), &doc)

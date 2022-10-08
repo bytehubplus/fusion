@@ -51,12 +51,12 @@ func NewProvider(conf StoreConfig) (*StoreProvider, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %s", err)
 	}
-	// defer db.Close()
 	store := &KvStore{db: db}
 	sp := &StoreProvider{
 		Config: conf,
 		Store:  *store,
 	}
+	defer db.Close()
 	return sp, nil
 }
 
