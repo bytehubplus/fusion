@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "pb/proto_demo";
+
+package proto;
+
+import "request.proto";
+import "response.proto";
+import "did.proto";
+
+service Process {
+    rpc ProcessRequest(SignedRequest) returns (SignedResponse);
+}
+
+service Handle {
+    rpc HandleRequest_DID (SignedRequest) returns (DID);
+}

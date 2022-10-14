@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+option go_package = "pb/proto_demo";
+
+package proto;
+
+/* import "google/protobuf/timestamp.proto"; */
+message SignedResponse {
+
+    // The bytes of Request
+    bytes Request_bytes = 1;
+
+  // Signaure over RequestBytes; this signature is to be verified against
+  // the creator identity contained in the header of the Request message
+  // marshaled as RequestBytes
+    bytes signature = 2;
+}
+
+// A Request is sent to an endorser for endorsement.  The Request contains:
+// 1. A header which should be unmarshaled to a Header message.  Note that
+//    Header is both the header of a Request and of a Transaction, in that i)
+//    both headers should be unmarshaled to this message; and ii) it is used to
+//    compute cryptographic hashes and signatures.  The header has fields common
+//    to all Requests/transactions.  In addition it has a type field for
+//    additional customization. An example of this is the ChaincodeHeaderExtension
+//    message used to extend the Header for type CHAINCODE.
+// 2. A payload whose type depends on the header's type field.
+// 3. An extension whose type depends on the header's type field.
+//
+// Let us see an example. For type CHAINCODE (see the Header message),
+// we have the following:
+// 1. The header is a Header message whose extensions field is a
+//    ChaincodeHeaderExtension message.
+// 2. The payload is a Chaincod RequestPayload message.
+// 3. The extension is a ChaincodeAction that might be used to ask the
+//    endorsers to endorse a specific ChaincodeAction, thus emulating the
+//    submitting peer model.
+message Response {
+
+    // The header of the Request. It is the bytes of the Header
+    bytes header = 1;
+
+    // The payload of the Request as defined by the type in the Request
+    // header.
+    bytes payload = 2;
+}
