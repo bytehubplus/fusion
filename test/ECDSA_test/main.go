@@ -1,3 +1,7 @@
+// Use ECDSA algorithm to verify the signature. Users should use
+// their own public key to sign and the public key is included in
+// the DID document.
+
 package main
 
 import (
@@ -10,6 +14,8 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
+// Request is the type of this request. Vault_ID and Entry_ID index the data which user wants to get.
+// Signature is the result of signing the above three variables.
 type Proof struct {
 	Request   string
 	Vault_ID  string

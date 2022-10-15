@@ -37,7 +37,7 @@ type IndexProvider struct {
 }
 
 // shorten and undetectable
-func (p *IndexProvider) generateVaultID(id string) string {
+func (p *IndexProvider) GenerateVaultID(id string) string {
 	did := fmt.Sprintf("%s:%s:%s", p.Config.Scheme, p.Config.Method, id)
 	h := sha256.Sum256([]byte(did))
 	return fmt.Sprintf("%x", h[:20])
@@ -45,7 +45,7 @@ func (p *IndexProvider) generateVaultID(id string) string {
 
 // register a vault, return vault ID
 func (i *IndexProvider) RegisterVault(id string) (string, error) {
-	vaultID := i.generateVaultID(id)
+	vaultID := i.GenerateVaultID(id)
 	err := i.db.Put([]byte(vaultID), []byte(id), nil)
 	if err != nil {
 		return "", err
@@ -56,7 +56,7 @@ func (i *IndexProvider) RegisterVault(id string) (string, error) {
 
 // unregiste a vault
 func (i *IndexProvider) UnregisterVault(id string) error {
-	vaultID := i.generateVaultID(id)
+	vaultID := i.GenerateVaultID(id)
 	err := i.db.Delete([]byte(vaultID), nil)
 	if err != nil {
 		return errors.New(fmt.Sprintf("unregister vault failed: %s", err))
@@ -79,7 +79,7 @@ func NewProvider(conf Config) (*IndexProvider, error) {
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("failed to open database: %s", err))
 	}
-	defer l.Close()
+	//defer l.Close()
 	p := &IndexProvider{Config: conf, db: l}
 	return p, nil
 }

@@ -56,7 +56,7 @@ func NewProvider(conf StoreConfig) (*StoreProvider, error) {
 		Config: conf,
 		Store:  *store,
 	}
-	defer db.Close()
+	//defer db.Close()
 	return sp, nil
 }
 

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "pb/proto_demo";
+
+package proto;
+
+message DID {
+
+    // Scheme is always "did"
+    bytes Scheme = 1;
+
+    // Method is the specific DID methods
+    bytes Method = 2;
+
+    // MethodSpecificID is the unique ID computed or assigned by the DID method
+    bytes MethodSpecificID = 3;
+}

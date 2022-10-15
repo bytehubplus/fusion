@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option go_package = "pb/proto_demo";
+
+package proto;
+
+/* import "google/protobuf/timestamp.proto"; */
+message SignedRequest {
+
+    // The bytes of Request
+    bytes Request_bytes = 1;
+
+  // Signaure over RequestBytes; this signature is to be verified against
+  // the creator identity contained in the header of the Request message
+  // marshaled as RequestBytes
+    bytes signature = 2;
+}
+
+message Request {
+
+    // The header of the request. It is the bytes of the Header
+    bytes header = 1;
+
+    // The payload of the request as defined by the type in the Request
+    // header.
+    bytes payload = 2;
+
+}
