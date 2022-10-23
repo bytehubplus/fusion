@@ -1,27 +1,26 @@
 package xrsa
 
 import (
-	"bytes"
-	"crypto"
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/base64"
 	"encoding/pem"
+	"encoding/base64"
+	"crypto/x509"
+	"crypto/rsa"
+	"crypto/rand"
 	"errors"
+	"crypto"
 	"io"
-	"os"
+	"bytes"
 )
 
 const (
-	CHAR_SET               = "UTF-8"
-	BASE_64_FORMAT         = "UrlSafeNoPadding"
+	CHAR_SET = "UTF-8"
+	BASE_64_FORMAT = "UrlSafeNoPadding"
 	RSA_ALGORITHM_KEY_TYPE = "PKCS8"
-	RSA_ALGORITHM_SIGN     = crypto.SHA256
+	RSA_ALGORITHM_SIGN = crypto.SHA256
 )
 
 type XRsa struct {
-	publicKey  *rsa.PublicKey
+	publicKey *rsa.PublicKey
 	privateKey *rsa.PrivateKey
 }
 
@@ -39,15 +38,6 @@ func CreateKeys(publicKeyWriter, privateKeyWriter io.Writer, keyLength int) erro
 		Type:  "PRIVATE KEY",
 		Bytes: derStream,
 	}
-	priveFile, err := os.Create("private.pem")
-	defer priveFile.Close()
-	if err != nil {
-		return err
-	}
-	err = pem.Encode(priveFile, block)
-	if err != nil {
-		return err
-	}
 	err = pem.Encode(privateKeyWriter, block)
 	if err != nil {
 		return err
@@ -62,17 +52,6 @@ func CreateKeys(publicKeyWriter, privateKeyWriter io.Writer, keyLength int) erro
 	block = &pem.Block{
 		Type:  "PUBLIC KEY",
 		Bytes: derPkix,
-	}
-	pubFile, err := os.Create("public.pem")
-	defer pubFile.Close()
-	if err != nil {
-		return err
-	}
-
-	//将公钥块编码到文件
-	err = pem.Encode(pubFile, block)
-	if err != nil {
-		return err
 	}
 	err = pem.Encode(publicKeyWriter, block)
 	if err != nil {
@@ -93,12 +72,6 @@ func NewXRsa(publicKey []byte, privateKey []byte) (*XRsa, error) {
 	}
 	pub := pubInterface.(*rsa.PublicKey)
 
-	if privateKey == nil {
-		return &XRsa{
-			publicKey:  pub,
-			privateKey: nil,
-		}, nil
-	}
 	block, _ = pem.Decode(privateKey)
 	if block == nil {
 		return nil, errors.New("private key error")
@@ -110,8 +83,8 @@ func NewXRsa(publicKey []byte, privateKey []byte) (*XRsa, error) {
 
 	pri, ok := priv.(*rsa.PrivateKey)
 	if ok {
-		return &XRsa{
-			publicKey:  pub,
+		return &XRsa {
+			publicKey: pub,
 			privateKey: pri,
 		}, nil
 	} else {
@@ -120,7 +93,7 @@ func NewXRsa(publicKey []byte, privateKey []byte) (*XRsa, error) {
 }
 
 func (r *XRsa) PublicEncrypt(data string) (string, error) {
-	partLen := r.publicKey.N.BitLen()/8 - 11
+	partLen := r.publicKey.N.BitLen() / 8 - 11
 	chunks := split([]byte(data), partLen)
 
 	buffer := bytes.NewBufferString("")
@@ -153,7 +126,7 @@ func (r *XRsa) PrivateDecrypt(encrypted string) (string, error) {
 }
 
 func (r *XRsa) PrivateEncrypt(data string) (string, error) {
-	partLen := r.publicKey.N.BitLen()/8 - 11
+	partLen := r.publicKey.N.BitLen() / 8 - 11
 	chunks := split([]byte(data), partLen)
 
 	buffer := bytes.NewBufferString("")
