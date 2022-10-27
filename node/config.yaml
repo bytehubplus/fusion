@@ -1,0 +1,12 @@
+nodes:
+  node1: 192.168.0.2:3000
+  node2: 192.168.0.3:3000
+  node3: 192.168.0.4:3000
+  node4: 192.168.0.5:3000
+  node5: 192.168.0.6:3000
+  node6: 192.168.0.7:3000
+vaultIndex:
+  path: ./data
+vaultPath: /data/vault/
+TLS:
+  tls: tls.key
