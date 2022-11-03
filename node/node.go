@@ -22,7 +22,7 @@ func (n *Node) Sig(message []byte) {
 	ed25519.Sign(n.privateKey.(ed25519.PrivateKey), message)
 }
 
-func main() {
+func Nodemain() {
 	/*
 		routersInit := routers.InitRouter()
 		endPoint := "http://127.0.0.1:8000"
@@ -58,6 +58,7 @@ func main() {
 	}
 
 	r := gin.Default()
+	//ssl tls ..
 	r.POST("/register", vault_regist.RegistVault)
 	r.POST("/register_safe", vault_regist.RegistVault_safe)
 	r.POST("/checkproof", check.CheckProof)

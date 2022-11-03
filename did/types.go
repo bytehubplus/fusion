@@ -9,4 +9,10 @@ type DID did.DID
 
 type Document did.Document
 
+type URI ssi.URI
+
 type KeyType ssi.KeyType
+
+const (
+	DIIDContext = did.DIDContextV1
+)
