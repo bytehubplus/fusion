@@ -61,9 +61,6 @@ type BHPCSP interface {
 	//KeyGen generates a new key
 	KeyGen(opts KeyGenOpts) (Key, error)
 
-	//GetKey returns the key
-	GetKey(keyInstance []byte) (Key, error)
-
 	//Hash hashes a message
 	Hash(msg []byte, opts HashOpts) ([]byte, error)
 

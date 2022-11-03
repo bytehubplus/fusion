@@ -20,6 +20,7 @@ package crypto
 import (
 	"crypto/ed25519"
 	"crypto/rand"
+	"crypto/sha512"
 	"errors"
 	"hash"
 )
@@ -43,37 +44,36 @@ func (k *Ed25519PrivateKey) generateEd25519Key() (Key, error) {
 	return key, nil
 }
 
-// GetKey returns the key
-func (e *Ed25519PrivateKey) GetKey(keyInstance []byte) (Key, error) {
-	panic("not implemented") // TODO: Implement
-}
-
 // Hash hashes a message
 func (e *Ed25519PrivateKey) Hash(msg []byte, opts HashOpts) ([]byte, error) {
-	panic("not implemented") // TODO: Implement
+	h, err := e.GetHash(opts)
+	if err != nil {
+		return nil, err
+	}
+	return h.Sum(msg), nil
 }
 
 // GetHash returns the instance of hash function
 func (e *Ed25519PrivateKey) GetHash(opt HashOpts) (hash.Hash, error) {
-	panic("not implemented") // TODO: Implement
+	return sha512.New(), nil
 }
 
 func (e *Ed25519PrivateKey) Encrypt(k Key, plaintext []byte, opts EncrypterOpts) ([]byte, error) {
-	panic("not implemented") // TODO: Implement
+	return nil, errors.New("this key does NOT support encrypt")
 }
 
 func (e *Ed25519PrivateKey) Decrypt(k Key, ciphertext []byte, opts DecrypterOpts) ([]byte, error) {
-	panic("not implemented") // TODO: Implement
+	return nil, errors.New("this key does NOT support decrypt")
 }
 
 // Sign signs a message's hash
 func (e *Ed25519PrivateKey) Sign(k Key, digest []byte, opts SignerOpts) ([]byte, error) {
-	panic("not implemented") // TODO: Implement
+	return ed25519.Sign(e.csp, digest), nil
 }
 
 // Verify verifies a signature
 func (e *Ed25519PrivateKey) Verify(k Key, signature []byte, digest []byte, opts SignerOpts) (bool, error) {
-	panic("not implemented") // TODO: Implement
+	return ed25519.Verify(e.pub.csi, digest, signature), nil
 }
 
 // the key's raw byte
