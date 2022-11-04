@@ -1,0 +1,19 @@
+{
+  "@context": "https://www.w3.org/ns/did/v1",
+  "assertionMethod": [
+    "did:example:123#key-1"
+  ],
+  "id": "did:example:123",
+  "verificationMethod": [
+    {
+      "controller": "did:example:123",
+      "id": "did:example:123#key-1",
+      "publicKeyJwk": {
+        "crv": "Ed25519",
+        "kty": "OKP",
+        "x": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3xJo54SebWXvTRrYfvRvvYd7hfpX8w3aO4JWGKNmroCIcGifEQa8aDZW0cJVwZXofbmkShUMMWfJHcJtzCXfEkcFX_gezcb1U8BjFDyp6UxHj3RPriEJB8tWLh2_SIYY2HMTxGRN7zrznGGvcTalaCor3cCdPBvaUBjA6kleMPRST_UhhQ4JuMJTy4KS23_tK2w0xDqWvcdqAJUwyG-EfKwuePfdJHI5Qvc97_LCJ53kVJSyTMo3PxvmkBt625HnP58Eg4l82XTaVqRHamfWn-cWNjl4z8Wlt433ThiruxmiDPcG3Zx4dSvmzR7bGzJ-nwta6vWW0yF01e2NN-0v3wIDAQAB"
+      },
+      "type": "JsonWebKey2020"
+    }
+  ]
+}
