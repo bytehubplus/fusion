@@ -67,19 +67,6 @@ func createDIDDoc(pubKey string, didFile string) error {
 	doc.AddAssertionMethod(vm)
 	didJson, _ := json.MarshalIndent(doc, "", "  ")
 
-	// fmt.Println(string(didJson))
-	// parsedDID := did.Document{}
-
-	// err := json.Unmarshal(didJson, &parsedDID)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// parsedDID.AssertionMethod[0].JWK()
-	// parsedDID.AssertionMethod[0].PublicKey()
-
-	// fmt.Printf("public key arg = %s \n", pubKey)
-	// fmt.Printf("out put did document file = %s\n", didFile)
-	// // err = os.WriteFile(didFile, didJson, 0644)
 	err := os.WriteFile(didFile, didJson, 0644)
 	return err
 }

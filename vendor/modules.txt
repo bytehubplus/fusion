@@ -6,7 +6,7 @@ github.com/btcsuite/btcd/btcec/v2/ecdsa
 ## explicit; go 1.17
 github.com/decred/dcrd/dcrec/secp256k1/v4
 github.com/decred/dcrd/dcrec/secp256k1/v4/ecdsa
-# github.com/ethereum/go-ethereum v1.10.25
+# github.com/ethereum/go-ethereum v1.10.26
 ## explicit; go 1.17
 github.com/ethereum/go-ethereum/common
 github.com/ethereum/go-ethereum/common/hexutil
