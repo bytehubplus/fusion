@@ -4,76 +4,99 @@ import (
 	"github.com/spf13/viper"
 )
 
-type ConfigFile struct {
-	ConfigFileName string // "config"
-	ConfigFileType string // "yaml"
-	ConfigFilePath string // "./conf"
+type Config struct {
+	FileName string // "config"
+	FileType string // "yaml"
+	FilePath string // "./conf"
 }
 
-// Find and read the config file
-func readConfigFile(configFile *ConfigFile) error {
+// viper instance
+var vp *viper.Viper
 
-	//set config file to read
-	viper.SetConfigName(configFile.ConfigFileName)
-	viper.SetConfigType(configFile.ConfigFileType)
-	viper.AddConfigPath(configFile.ConfigFilePath)
-
-	err := viper.ReadInConfig()
-	return err
+func NewConfig(fileName, fileType, filePath string) Config {
+	//init Config
+	conf := Config{FileName: fileName,
+		FileType: fileType,
+		FilePath: filePath}
+	return conf
 }
 
-func (configFile *ConfigFile) GetNodes() map[string]string {
+// set config file and get nodes
+func (conf *Config) GetNodes() (map[string]string, error) {
 
-	nodes := make(map[string]string)
+	//viper set config file
+	vp = viper.New()
+	vp.SetConfigName(conf.FileName)
+	vp.SetConfigType(conf.FileType)
+	vp.AddConfigPath(conf.FilePath)
 
-	err := readConfigFile(configFile)
-	if err != nil { // Handle errors reading the config file
-		return nodes
+	err := vp.ReadInConfig()
+	if err != nil {
+		return nil, err
 	}
 
-	nodes = viper.GetStringMapString("nodes")
+	//get nodes
+	nodes := vp.GetStringMapString("nodes")
+	return nodes, nil
 
-	return nodes
 }
 
-func (configFile *ConfigFile) GetVaultIndex() map[string]string {
+// set config file and get vaultIndex
+func (conf *Config) GetVaultIndex() (map[string]string, error) {
 
-	vaultIndex := make(map[string]string)
+	//viper set config file
+	vp = viper.New()
+	vp.SetConfigName(conf.FileName)
+	vp.SetConfigType(conf.FileType)
+	vp.AddConfigPath(conf.FilePath)
 
-	err := readConfigFile(configFile)
-	if err != nil { // Handle errors reading the config file
-		return vaultIndex
+	err := vp.ReadInConfig()
+	if err != nil {
+		return nil, err
 	}
 
-	vaultIndex = viper.GetStringMapString("vaultIndex")
+	//get vault
+	vaultIndex := vp.GetStringMapString("vaultIndex")
+	return vaultIndex, nil
 
-	return vaultIndex
 }
 
-func (configFile *ConfigFile) GetLogfile() map[string]string {
+// set config file and get logFile
+func (conf *Config) GetLogFile() (map[string]string, error) {
 
-	logFile := make(map[string]string)
+	//viper set config file
+	vp = viper.New()
+	vp.SetConfigName(conf.FileName)
+	vp.SetConfigType(conf.FileType)
+	vp.AddConfigPath(conf.FilePath)
 
-	err := readConfigFile(configFile)
-	if err != nil { // Handle errors reading the config file
-		return logFile
+	err := vp.ReadInConfig()
+	if err != nil {
+		return nil, err
 	}
 
-	logFile = viper.GetStringMapString("logfile")
+	//get logFile
+	logFile := vp.GetStringMapString("logFile")
+	return logFile, nil
 
-	return logFile
 }
 
-func (configFile *ConfigFile) GetPlugin() map[string]string {
+// set config file and get plugin
+func (conf *Config) GetPlugin() (map[string]string, error) {
 
-	plugin := make(map[string]string)
+	//viper set config file
+	vp = viper.New()
+	vp.SetConfigName(conf.FileName)
+	vp.SetConfigType(conf.FileType)
+	vp.AddConfigPath(conf.FilePath)
 
-	err := readConfigFile(configFile)
-	if err != nil { // Handle errors reading the config file
-		return plugin
+	err := vp.ReadInConfig()
+	if err != nil {
+		return nil, err
 	}
 
-	plugin = viper.GetStringMapString("plugin")
+	//get plugin
+	plugin := vp.GetStringMapString("plugin")
+	return plugin, nil
 
-	return plugin
 }
