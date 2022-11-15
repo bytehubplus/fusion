@@ -33,14 +33,14 @@ type Key interface {
 	PublicKey() (Key, error)
 }
 
-// Key generation options for BHPCSP
+// Key generation options for CryptoProvider
 type KeyGenOpts interface {
-	Algorithem() string
+	Algorithm() string
 }
 
-// HashOpts contains hash options for BHPCSP
+// HashOpts contains hash options for CryptoProvider
 type HashOpts interface {
-	Algorithem() string
+	Algorithm() string
 }
 
 // EncrypterOpts contains encrypting options
@@ -56,10 +56,30 @@ type SignerOpts interface {
 	gocrypto.SignerOpts
 }
 
-// bytehub+ crytograhic service provider
-type BHPCSP interface {
-	//KeyGen generates a new key
+type Signer interface {
+	//Sign signs a message's hash
+	Sign(k Key, digest []byte) ([]byte, error)
+}
+
+type Verifier interface {
+	Verify(k Key, signature, digest []byte) (bool, error)
+}
+
+type Encrypter interface {
+	Encrypt(k Key, plaintext []byte) ([]byte, error)
+}
+
+type Decrypter interface {
+	Decrypt(k Key, ciphertext []byte) ([]byte, error)
+}
+
+// bytehub+ crytograhic provider
+type CryptoProvider interface {
+	//KeyGen generates a new symmetric key
 	KeyGen(opts KeyGenOpts) (Key, error)
+
+	//KeyGen generates a new pair of asymmetric key
+	KeyPairGen(opts KeyGenOpts) (Key, Key, error)
 
 	//Hash hashes a message
 	Hash(msg []byte, opts HashOpts) ([]byte, error)
@@ -67,11 +87,8 @@ type BHPCSP interface {
 	//GetHash returns the instance of hash function
 	GetHash(opt HashOpts) (hash.Hash, error)
 
-	Encrypt(k Key, plaintext []byte, opts EncrypterOpts) ([]byte, error)
-	Decrypt(k Key, ciphertext []byte, opts DecrypterOpts) ([]byte, error)
-
-	//Sign signs a message's hash
-	Sign(k Key, digest []byte, opts SignerOpts) ([]byte, error)
-	//Verify verifies a signature
-	Verify(k Key, signature, digest []byte, opts SignerOpts) (bool, error)
+	Encrypter
+	Decrypter
+	Signer
+	Verifier
 }

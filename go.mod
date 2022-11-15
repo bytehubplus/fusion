@@ -31,7 +31,6 @@ require (
 	github.com/shengdoushi/base58 v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
-	golang.org/x/crypto v0.0.0-20220924013350-4ba4fb4dd9e7 // indirect
 	golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
@@ -39,11 +38,12 @@ require (
 )
 
 require (
-	github.com/ethereum/go-ethereum v1.10.25
+	github.com/ethereum/go-ethereum v1.10.26
 	github.com/gin-gonic/gin v1.8.1
 	github.com/nuts-foundation/go-did v0.3.0
 	github.com/spf13/cobra v1.6.1
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
+	golang.org/x/crypto v0.0.0-20220924013350-4ba4fb4dd9e7
 	golang.org/x/net v0.0.0-20220923203811-8be639271d50
 	google.golang.org/grpc v1.50.1
 	google.golang.org/protobuf v1.28.1
