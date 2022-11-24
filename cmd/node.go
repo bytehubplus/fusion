@@ -1,6 +1,5 @@
 /*
 Copyright © 2022 ZHAO Zhenhua <zhao.zhenhua@gmail.com>
-
 */
 package cmd
 
@@ -27,8 +26,9 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(nodeCmd)
-
-	// Here you will define your flags and configuration settings.
+	/* go api.StartService() //rest for end users/applications
+	go grpcServer.Start() //grpc amount nodes
+	// Here you will define your flags and configuration settings. */
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
