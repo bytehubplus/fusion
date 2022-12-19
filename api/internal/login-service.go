@@ -29,7 +29,7 @@ type loginService struct {
 
 // if sign by vaultID's controller, return true
 func (service *loginService) Login(vaultID string, nonce string, signature string) bool {
-	return true
+	return vaultID == "bytehubplus" && signature == "richzhao"
 }
 
 func NewLoginService() LoginService {
