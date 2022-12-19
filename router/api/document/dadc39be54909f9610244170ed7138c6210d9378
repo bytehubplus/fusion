@@ -1,0 +1,20 @@
+{
+  "@context": "https://www.w3.org/ns/did/v1",
+  "assertionMethod": [
+    "did:example:123#key-1"
+  ],
+  "id": "did:example:123",
+  "verificationMethod": [
+    {
+      "controller": "did:example:123",
+      "id": "did:example:123#key-1",
+      "publicKeyJwk": {
+        "crv": "P-256",
+        "kty": "EC",
+        "x": "72xGXSPCNtXDyya_SoWsmD24ziaG1cjwP9H-t47WbCo",
+        "y": "I_26X5ik2o20Iebx8F1PGugnJSlCqXG5U2Sw77rf6CQ"
+      },
+      "type": "JsonWebKey2020"
+    }
+  ]
+}
