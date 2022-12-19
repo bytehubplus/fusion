@@ -70,7 +70,6 @@ func (service *jwtService) ValidateToken(tokenString string) (*jwt.Token, error)
 		return []byte(service.secretKey), nil
 	})
 }
-
 func NewJWTService() JWTService {
 	return &jwtService{
 		secretKey: "richzhao",
