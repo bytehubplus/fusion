@@ -7,3 +7,9 @@ logFile:
   path: ./logfile
 plugin:
   path: ./plugin
+start_address: 127.0.0.1
+port: 8080
+save_location:
+  vault_data: "./data"
+  did_document: "./document" 
+  publicKey: "./key"

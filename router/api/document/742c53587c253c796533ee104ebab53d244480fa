@@ -11,7 +11,7 @@
       "publicKeyJwk": {
         "crv": "Ed25519",
         "kty": "OKP",
-        "x": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEal6CFloTXo354MVALiy6cAh1uiNu8SGeWLx_8OGgKQPvRDku8GFK6dMxXu-oG2xAZpAmI1jKA-LhJZePPeC72g"
+        "x": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEL_SyJnE15_TagmnLlLgnKM5VQzRqgue4eNPOrlK0btUFYf1Y0hq_tkFHYxNUrmNXVfZbxqG9SMvEblojuOOEtw"
       },
       "type": "JsonWebKey2020"
     }

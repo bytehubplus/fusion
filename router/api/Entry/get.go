@@ -1,24 +1,25 @@
-package controller
+package entry
 
 import (
 	_ "embed"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"time"
 
+	vault "github.com/bytehubplus/fusion/node/vaultindex"
 	"github.com/golang-jwt/jwt/v4"
 
 	"github.com/gin-gonic/gin"
 )
 
-type Message_list struct {
-	Token string
+type Message_Get struct {
+	Entry_ID string
+	Token    string
 }
 
-func List(c *gin.Context) {
+func Get(c *gin.Context) {
 	keyInfo := "fusion"
-	postdata := Message_list{}
+	postdata := Message_Get{}
 	c.BindJSON(&postdata)
 	//将token字符串转换为token对象
 	tokenInfo, _ := jwt.Parse(postdata.Token, func(token *jwt.Token) (i interface{}, e error) {
@@ -41,23 +42,17 @@ func List(c *gin.Context) {
 	var vaultID string
 	vaultID = fmt.Sprintf("%s", finToken["VaultID"])
 
-	var s []string
-	s, _ = GetAllFile("./key/"+vaultID, s)
-
-	c.JSON(200, s)
-}
-func GetAllFile(pathname string, s []string) ([]string, error) {
-	rd, err := ioutil.ReadDir(pathname)
+	conf := vault.Config{
+		Scheme: "did",
+		Method: "rich",
+		DBPath: "./data/" + vaultID,
+	}
+	provider, _ := vault.NewProvider(conf)
+	data, err := provider.Get(postdata.Entry_ID)
 	if err != nil {
-		fmt.Println("read dir fail:", err)
-		return s, err
+		c.JSON(400, "Get data failed.")
+	} else {
+		c.JSON(200, data)
 	}
 
-	for _, fi := range rd {
-		if !fi.IsDir() {
-			fullName := pathname + "/" + fi.Name()
-			s = append(s, fullName)
-		}
-	}
-	return s, nil
 }
