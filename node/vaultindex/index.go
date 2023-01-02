@@ -21,6 +21,8 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"math/rand"
+	"time"
 
 	"github.com/syndtr/goleveldb/leveldb"
 )
@@ -72,6 +74,44 @@ func (p *IndexProvider) VaultExits(id string) bool {
 		return false
 	}
 	return exist != nil || len(exist) > 0
+}
+
+// Put data into entryID if entryID exist. if entryID is nil, create a entryID and return it.
+func (i *IndexProvider) Put(entryID string, data string) (string, error) {
+	if entryID != "" {
+		err := i.db.Put([]byte(entryID), []byte(data), nil)
+		if err != nil {
+			return "", err
+		}
+		return "", nil
+	}
+	rand.Seed(time.Now().UnixNano())
+	num := rand.Intn(100)
+	entry := "entry_"
+	entry = entry + fmt.Sprintf("%d", num)
+	err := i.db.Put([]byte(entry), []byte(data), nil)
+	if err != nil {
+		return "", err
+	}
+	return entry, nil
+}
+
+// Get data from entryID
+func (i *IndexProvider) Get(entryID string) (string, error) {
+	data, err := i.db.Get([]byte(entryID), nil)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+// Delete data according to entryID
+func (i *IndexProvider) Delete(entryID string) error {
+	err := i.db.Delete([]byte(entryID), nil)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func NewProvider(conf Config) (*IndexProvider, error) {

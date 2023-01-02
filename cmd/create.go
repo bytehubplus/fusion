@@ -30,7 +30,7 @@ to quickly create a Cobra application.`,
 		fmt.Println("create called")
 		pubKey, _ := cmd.Flags().GetString("public")
 		didFile, _ := cmd.Flags().GetString("output")
-		createDIDDoc(pubKey, didFile)
+		CreateDIDDoc(pubKey, didFile)
 	},
 }
 
@@ -47,7 +47,7 @@ func init() {
 	createCmd.MarkFlagRequired("output")
 }
 
-func createDIDDoc(pubKey string, didFile string) error {
+func CreateDIDDoc(pubKey string, didFile string) error {
 	raw, _ := os.ReadFile(pubKey)
 	block, rest := pem.Decode(raw)
 	if block == nil || block.Type != "PUBLIC KEY" {
